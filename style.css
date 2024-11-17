@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+.main_config {
+    margin: 30px;
+    width: 100px;
+}
+.container {
+    width: 60vw;
+    margin: auto;
+}
+.position-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.position-row select, 
+.position-row input {
+    margin-right: 10px;
+}
+.position-row input {
+    width: 100px;
+}
+#chart {
+    width: 100%;
+    height: 400px;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+}
+#addPosition {
+
+}
+table {
+    border-collapse: collapse; /* 讓邊框合併為單一邊框 */
+    width: 100%; /* 可選，設定表格的寬度 */
+}
+
+th, td {
+    border: 1px solid #000; /* 設定邊框的樣式和顏色 */
+    padding: 8px; /* 可選，設定內距 */
+    text-align: center; /* 可選，設定文字置中 */
+}
+body > div:not(.trade-line) {
+    display: inline-table;
+    margin: 30px;
+}
+
+
+#optionTable {
+    border-collapse: collapse;
+    width: 20vw;
+}
+
+#optionTable td, #optionTable th {
+    border: 1px solid #ccc;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+}
+
+#optionTable td.call:hover, #optionTable td.put:hover {
+    background-color: #f0f8ff; /* 滑鼠移到可操作區域高亮 */
+}
+
+.trade-line {
+    position: absolute;
+    background-color: #000; /* 線條顏色 */
+    z-index: 1000;
+    pointer-events: none; /* 避免線條干擾操作 */
+}
+.trade-builder {
+    max-width: 40vw;
+    user-select: none; /* 停用文字選擇 */
+}

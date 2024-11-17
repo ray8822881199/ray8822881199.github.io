@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇權艙位損益模擬</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="trade-builder">
+        <table id="optionTable">
+            <thead>
+                <tr>
+                    <th>call</th>
+                    <th>履約價</th>
+                    <th>put</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 動態生成更多行 -->
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+        <h1>選擇權艙位損益模擬</h1>
+        <div id="chart"></div>
+        <button id="addPosition">新增倉位</button>
+        <span>
+            <label for="market-price">大盤價平</label>
+            <input type="text" id="market-price" class="main_config market-price" placeholder="大盤價平" />
+        </span>
+        <span>
+            <label for="analysis-width">分析寬度</label>
+            <input type="text" id="analysis-width" class="main_config analysis-width" placeholder="分析寬度" />
+        </span>
+        <span>
+            <label for="precision">精細度</label>
+            <input type="text" id="precision" class="main_config precision" placeholder="精細度" />
+        </span>
+        <table id="positions" border="1">
+            <thead>
+                <tr>
+                    <th>類型</th>
+                    <th>持倉點位</th>
+                    <th>建倉成本</th>
+                    <th>持倉數量</th>
+                    <th>測試單</th>
+                    <th>是否計算</th>
+                    <th>已平倉</th>
+                    <th>平倉點數</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 這裡會動態插入每一筆持倉的資料 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 引用 JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="script.js"></script> <!-- 本地 JavaScript 文件 -->
+</body>
+</html>
