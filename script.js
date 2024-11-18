@@ -4,24 +4,26 @@
 
 $(document).ready(function () {
 
-    let value=22500; // 價平
-    let analysisWidth = 0.03; // 價位寬度
+    let underlyingPrice=22500; // 價平
+    let analysisWidth = 0.06; // 價位寬度
     let part = 100; // 切成幾分
-    let priceRange = { min: value*(1-analysisWidth), max: value*(1+analysisWidth) }; // 收盤價格範圍（可調整）
+    let priceRange = { min: underlyingPrice*(1-analysisWidth), max: underlyingPrice*(1+analysisWidth) }; // 收盤價格範圍（可調整）
 
-    let item=10; // 價平上下檔數
+    let item=20; // 價平上下檔數
     let point=50; // 每檔間隔
-    let pointPrice=50; // 每點價值
+    let contractMultiplier=50; // 每點價值
+    let AValue=81000;
+    let BValue=41000;
 
-    $('#market-price').val(value);
+    $('#market-price').val(underlyingPrice);
     $('#analysis-width').val(analysisWidth);
     $('#precision').val(part);
 
-    $('.main_config').on('change',function () {
-        value = Number($('#market-price').val()||value);
+    $('.overall_config').on('change',function () {
+        underlyingPrice = Number($('#market-price').val()||underlyingPrice);
         analysisWidth = Number($('#analysis-width').val()||analysisWidth);
         part = Number($('#precision').val()||part);
-        priceRange = { min: value*(1-analysisWidth), max: value*(1+analysisWidth) };
+        priceRange = { min: underlyingPrice*(1-analysisWidth), max: underlyingPrice*(1+analysisWidth) };
         updateChart();
     });
 
@@ -47,6 +49,48 @@ $(document).ready(function () {
         updateChart();
     });
 
+
+
+    function calculateOptionMarginOrPremium(
+        strikePrice,
+        optionType,       // 'call' 或 'put'
+        positionType,     // 'buy' 或 'sell'
+        premium
+    ) {
+        // 權利金市值
+        const premiumValue = premium * contractMultiplier;
+        let a=AValue;
+        let b=BValue;
+
+        // 計算價內外距離，調整 AValue 和 BValue
+        const distance = Math.abs(underlyingPrice - strikePrice);
+        if (distance >= 500 && distance < 1000) {
+            a *= 1.2;
+            b *= 1.2;
+        } else if (distance >= 1000) {
+            a *= 1.5;
+            b *= 1.5;
+        }
+
+        // 持倉類型處理
+        if (positionType === 'buy') {
+            // 買進選擇權，只需支付權利金
+            return premiumValue;
+        } else if (positionType === 'sell') {
+            // 賣出選擇權，計算保證金
+            const outOfTheMoneyValue =
+                optionType === 'call'
+                    ? Math.max((strikePrice - underlyingPrice) * contractMultiplier, 0)
+                    : Math.max((underlyingPrice - strikePrice) * contractMultiplier, 0);
+
+            // 計算保證金
+            const margin = premiumValue + Math.max(a - outOfTheMoneyValue, b);
+            return margin;
+        } else {
+            throw new Error('無效的持倉類型，僅支持 "buy" 或 "sell"。');
+        }
+    }
+
     function updatePositions(row) {
         const positionId = row.data('id');
         const type = row.find('.position-select').val();
@@ -58,6 +102,8 @@ $(document).ready(function () {
         const isclosed = row.find('.isclosed').is(':checked');
         const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
         positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
+        console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
+        console.log(calculateOptionMarginOrPremium(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
     }
 
     //增加持倉項目
@@ -227,9 +273,9 @@ $(document).ready(function () {
 
         // 組合總損益數據
         for (let i = 0; i < totalProfit.length; i++) {
-            totalData.push([profitPrice[i], totalProfit[i]*pointPrice]);
-            totalTestData.push([profitPrice[i], testTotalProfit[i]*pointPrice]);
-            onlyTestData.push([profitPrice[i], onlyTestProfit[i]*pointPrice]);
+            totalData.push([profitPrice[i], totalProfit[i]*contractMultiplier]);
+            totalTestData.push([profitPrice[i], testTotalProfit[i]*contractMultiplier]);
+            onlyTestData.push([profitPrice[i], onlyTestProfit[i]*contractMultiplier]);
         }
 
         // 更新圖表
@@ -262,6 +308,19 @@ $(document).ready(function () {
                 name: '損益',
             },
             series: [{
+                name: '測試倉',
+                type: 'line',
+                data: onlyTestData,
+                symbol: 'none',
+                emphasis: {
+                    focus: 'series',
+                },
+                color: 'red',  // 設定紅色
+                lineStyle: {
+                    type: 'dashed', // 設定虛線
+                    width: 2  // 設定線寬，視需要可調整
+                }
+            },{
                 name: '持倉',
                 type: 'line',
                 data: totalData,
@@ -285,20 +344,7 @@ $(document).ready(function () {
                 color: 'blue',  // 設定黃色
                 lineStyle: {
                     type: 'dashed',    // 設定實線
-                    width: 1          // 設定線寬，視需要可調整
-                }
-            },{
-                name: '測試倉',
-                type: 'line',
-                data: onlyTestData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
-                },
-                color: 'red',  // 設定紅色
-                lineStyle: {
-                    type: 'dashed', // 設定虛線
-                    width: 2  // 設定線寬，視需要可調整
+                    width: 2          // 設定線寬，視需要可調整
                 }
             }],
         });
@@ -308,7 +354,7 @@ $(document).ready(function () {
             let row = $(`
                 <tr ><tr>
                     <td class="call">C</td>
-                    <td class="strike">${value-(item-i)*point}</td>
+                    <td class="strike">${underlyingPrice-(item-i)*point}</td>
                     <td class="put">P</td>
                 </tr></tr>
             `);
