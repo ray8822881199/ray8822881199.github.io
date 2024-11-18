@@ -1,5 +1,4 @@
-
-
+/* jshint esversion: 6 */
 
 
 
@@ -44,7 +43,11 @@ $(document).ready(function () {
     });
 
     $('#positions tbody').off('click').on('change', 'select, input', function () {
-        const row = $(this).closest('tr');
+        updatePositions($(this).closest('tr'));
+        updateChart();
+    });
+
+    function updatePositions(row) {
         const positionId = row.data('id');
         const type = row.find('.position-select').val();
         const strikePrice = parseFloat(row.find('.strike-price').val()) || 0;
@@ -55,12 +58,9 @@ $(document).ready(function () {
         const isclosed = row.find('.isclosed').is(':checked');
         const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
         positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
-        updateChart();
-    });
+    }
 
-
-
-    //增加項目
+    //增加持倉項目
     function addItem(itemType, itemPrice) {
 
         const positionId = Math.max(
@@ -100,6 +100,8 @@ $(document).ready(function () {
         if (itemPrice) {
             row.find('.strike-price').val(itemPrice); // 填充持倉點位
         }
+
+        // 觸發更新
         row.find('.position-select').trigger('change');
 
         row.off('click').on('click', '.remove-btn', function () {
@@ -132,10 +134,12 @@ $(document).ready(function () {
     // 更新圖表
     function updateChart() {
         const totalData = [];
-        const totalTtestData = [];
-        const totalProfit = new Array(part).fill(0); // 總損益陣列
+        const totalTestData = [];
+        const onlyTestData = [];
         const profitPrice = new Array(part).fill(0); // 價位陣列
-        const testTotalProfit = new Array(part).fill(0); // 測試單總損益陣列
+        const totalProfit = new Array(part).fill(0); // 持倉單總損益陣列
+        const testTotalProfit = new Array(part).fill(0); // 測試單加持倉單總損益陣列
+        const onlyTestProfit = new Array(part).fill(0); // 僅測試單損益陣列
 
         // 遍歷每個倉位
         positions.forEach((pos, index) => {
@@ -170,28 +174,16 @@ $(document).ready(function () {
                             profit = (strikePrice - closingPrice - cost) * quantity;
                             break;
                         case 'buy_call':
-                            profit =
-                                closingPrice <= strikePrice
-                                    ? -cost * quantity
-                                    : (closingPrice - strikePrice - cost) * quantity;
+                            profit = closingPrice <= strikePrice ? -cost * quantity : (closingPrice - strikePrice - cost) * quantity;
                             break;
                         case 'sell_call':
-                            profit =
-                                closingPrice <= strikePrice
-                                    ? cost * quantity
-                                    : (cost - (closingPrice - strikePrice)) * quantity;
+                            profit = closingPrice <= strikePrice ? cost * quantity : (cost - (closingPrice - strikePrice)) * quantity;
                             break;
                         case 'buy_put':
-                            profit =
-                                closingPrice >= strikePrice
-                                    ? -cost * quantity
-                                    : (strikePrice - closingPrice - cost) * quantity;
+                            profit = closingPrice >= strikePrice ? -cost * quantity : (strikePrice - closingPrice - cost) * quantity;
                             break;
                         case 'sell_put':
-                            profit =
-                                closingPrice >= strikePrice
-                                    ? cost * quantity
-                                    : (cost - (strikePrice - closingPrice)) * quantity;
+                            profit = closingPrice >= strikePrice ? cost * quantity : (cost - (strikePrice - closingPrice)) * quantity;
                             break;
                     }
                 }else{
@@ -217,10 +209,14 @@ $(document).ready(function () {
                     }
                 }
 
-                // 將每個倉位的損益加到總損益中
-                if(!pos.istest){
+                if(pos.istest){
+                    // 僅測試
+                    onlyTestProfit[i] += profit;
+                }else{
+                    // 僅持倉
                     totalProfit[i] += profit;
                 }
+                // 測試加持倉
                 testTotalProfit[i] += profit;
 
                 profitPrice[i] = closingPrice;
@@ -232,7 +228,8 @@ $(document).ready(function () {
         // 組合總損益數據
         for (let i = 0; i < totalProfit.length; i++) {
             totalData.push([profitPrice[i], totalProfit[i]*pointPrice]);
-            totalTtestData.push([profitPrice[i], testTotalProfit[i]*pointPrice]);
+            totalTestData.push([profitPrice[i], testTotalProfit[i]*pointPrice]);
+            onlyTestData.push([profitPrice[i], onlyTestProfit[i]*pointPrice]);
         }
 
         // 更新圖表
@@ -242,10 +239,17 @@ $(document).ready(function () {
                 formatter: function (params) {
                     let tooltip = `${params[0].axisValue}<br>`;
                     params.forEach(item => {
-                        tooltip += `${item.marker} ${item.seriesName}: ${item.data[1].toFixed(2)}<br>`;
+                        tooltip += `${item.seriesName}: ${item.data[1].toFixed(2)}<br>`;
                     });
                     return positions.length && tooltip;
                 },
+            },
+            legend: {
+                show: true,  // 開啟圖例
+                data: ['持倉', '套用後', '測試倉'],  // 顯示的圖例名稱
+                textStyle: {
+                    color: '#333',  // 設置圖例文字顏色
+                }
             },
             xAxis: {
                 type: 'value',
@@ -258,19 +262,44 @@ $(document).ready(function () {
                 name: '損益',
             },
             series: [{
-                name: '總損益',
+                name: '持倉',
                 type: 'line',
                 data: totalData,
+                symbol: 'none',
                 emphasis: {
                     focus: 'series',
                 },
+                color: 'blue',  // 設定黃色
+                lineStyle: {
+                    type: 'solid',    // 設定實線
+                    width: 2          // 設定線寬，視需要可調整
+                }
             },{
-                name: '測試損益',
+                name: '套用後',
                 type: 'line',
-                data: totalTtestData,
+                data: totalTestData,
+                symbol: 'none',
                 emphasis: {
                     focus: 'series',
                 },
+                color: 'blue',  // 設定黃色
+                lineStyle: {
+                    type: 'dashed',    // 設定實線
+                    width: 1          // 設定線寬，視需要可調整
+                }
+            },{
+                name: '測試倉',
+                type: 'line',
+                data: onlyTestData,
+                symbol: 'none',
+                emphasis: {
+                    focus: 'series',
+                },
+                color: 'red',  // 設定紅色
+                lineStyle: {
+                    type: 'dashed', // 設定虛線
+                    width: 2  // 設定線寬，視需要可調整
+                }
             }],
         });
 
@@ -290,20 +319,24 @@ $(document).ready(function () {
         }
     }
 
+
+
     // 新增倉位
     $('#addPosition').off('click').on('click', function(){
         addItem(0, 0);
+    });
+    // 測試倉轉持倉
+    $('#comfirmPosition').off('click').on('click', function(){
+        $('.istest:checked').each(function(){
+            $(this).prop('checked', false);
+            updatePositions($(this).closest('tr'));
+        });
         updateChart();
     });
 
-    initChart();
-    updateChart();
 
     // 建倉工具表
     let linewidth=5;
-
-    
-
     let isBuilding = false; // 是否處於建倉模式
     let startCell = null; // 開始的單元格
     let endCell = null; // 結束的單元格
@@ -371,6 +404,10 @@ $(document).ready(function () {
             }
         }
     });
+
+
+    initChart();
+    updateChart();
 });
 
 
