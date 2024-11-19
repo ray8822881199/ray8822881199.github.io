@@ -82,3 +82,18 @@ table {
     z-index: 1000;
     pointer-events: none; /* 避免線條干擾操作 */
 }
+
+
+
+
+footer {
+    font-size: 12px; /* 縮小字體 */
+    text-align: center; /* 水平置中 */
+    margin-top: 20px; /* 預留空間讓頁尾有呼吸感 */
+}
+
+footer a {
+    color: gray; /* 超連結顏色灰色 */
+    font-weight: bold; /* 超連結字體加粗 */
+    text-decoration: none; /* 移除超連結底線 */
+}

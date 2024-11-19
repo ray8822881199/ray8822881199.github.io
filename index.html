@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="利用最新的選擇權保證金計算工具，快速計算單口與多口的保證金需求，找出最佳化保證金方案，提升交易效率。">
+    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選擇權艙位損益模擬</title>
+
+    <title>選擇權倉位損益計算機</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>選擇權艙位損益模擬</h1>
+    <h1>選擇權倉位損益計算機</h1>
+    <div>
+        <p>輸入當前大盤點位並利用滑鼠在左側點選拖拉建立你的倉位，即可看到你的策略在各個位置的表現。</p>
+    </div>
     <div>
         <div class="trade-builder">
             <table id="optionTable">
@@ -24,8 +30,6 @@
             </table>
         </div>
         <div class="container">
-            
-            <div id="chart"></div>
             <div id="main_config">
                 <button id="addPosition">新增倉位</button>
                 <button id="comfirmPosition">測試倉轉持倉</button>
@@ -42,6 +46,7 @@
                     <input type="text" id="precision" class="overall_config precision" placeholder="精細度" />
                 </span>
             </div>
+            <div id="chart"></div>
             <table id="positions" border="1">
                 <thead>
                     <tr>
@@ -62,6 +67,11 @@
             </table>
         </div>
     </div>
+    <footer>
+        <p>Copyright © 2024 Ray. All Rights Reserved.</p>
+        <p>本作品採用 CC BY-NC-SA 4.0 授權條款，允許非商業性質的轉載與修改，但需註明來源並以相同條件分享。</p>
+        <p>如有任何問題，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
+    </footer>
     <!-- 引用 JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
