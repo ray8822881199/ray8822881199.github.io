@@ -470,7 +470,7 @@ $(document).ready(function () {
 
 
 
-
+/*
 
 
 
@@ -696,3 +696,5 @@ console.time('計時名稱');
 let result = getPairings(elements);
 console.log('分組方式:', result);
 console.timeEnd('計時名稱');
+
+*/
