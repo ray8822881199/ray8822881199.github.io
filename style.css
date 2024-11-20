@@ -2,6 +2,8 @@
 body {
     font-family: Arial, sans-serif;
     padding: 0 10px;
+    background-color: #121212; /* 深色背景 */
+    color: #e0e0e0; /* 淺色文字 */
 }
 body>div {
     display: flex;
@@ -9,6 +11,39 @@ body>div {
 table {
     border-collapse: collapse; /* 讓邊框合併為單一邊框 */
 }
+
+input, textarea {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    padding: 5px;
+}
+
+button {
+    background-color: #444;    /* 按鈕背景深灰色 */
+    color: #fff;               /* 按鈕文字白色 */
+    border: 1px solid #555;    /* 邊框略深，提供層次 */
+    border-radius: 5px;        /* 圓角 */
+    padding: 10px 20px;        /* 增加按鈕內邊距 */
+    font-size: 14px;           /* 文字大小適中 */
+    cursor: pointer;           /* 鼠標指針樣式 */
+    transition: all 0.3s ease; /* 平滑過渡效果 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 輕微陰影 */
+}
+button:hover {
+    background-color: #555;    /* 背景加深 */
+    color: #e0e0e0;            /* 文字稍淡，減少刺眼感 */
+    border-color: #666;        /* 邊框同步變化 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 加強陰影效果 */
+}
+button:active {
+    background-color: #333;    /* 更深的背景色 */
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2); /* 壓縮陰影 */
+    transform: scale(0.98);    /* 按下時縮小一點 */
+}
+
+
+
 
 
 
@@ -29,29 +64,33 @@ table {
 #optionTable {
     border-collapse: collapse;
     width: 100%;
+    background-color: #1e1e1e; /* 深色背景 */
 }
 #optionTable td, 
 #optionTable th {
-    border: 1px solid #ccc;
+    border: 1px solid #333; /* 深色邊框 */
     text-align: center;
     padding: 3px;
     cursor: pointer;
+    color: #e0e0e0; /* 淺色文字 */
 }
 #optionTable td.call:hover, 
 #optionTable td.put:hover {
-    background-color: #f0f8ff;
+    background-color: #3e3e3e; /* 深色背景在 hover 時 */
 }
 
 
 /* 持倉表 */
 #positions {
     width: 100%;
+    background-color: #1e1e1e; /* 深色背景 */
 }
 #positions th,
 #positions td {
-    border: 1px solid #000; 
+    border: 1px solid #333; /* 深色邊框 */
     padding: 2px; 
     text-align: center;
+    color: #e0e0e0; /* 淺色文字 */
 }
 .position-row {
     display: flex;
@@ -63,17 +102,22 @@ table {
 }
 .position-row input {
     width: 100px;
+    background-color: #333; /* 深色背景 */
+    color: #e0e0e0; /* 淺色文字 */
 }
 
 #main_config {
     padding: 10px;
+    background-color: #1e1e1e; /* 深色背景 */
+    color: #e0e0e0; /* 淺色文字 */
 }
 
 /* 圖表 */
 #chart {
     width: 100%;
     height: 400px;
-    border: 1px solid #ddd;
+    border: 1px solid #444; /* 深色邊框 */
+    background-color: #1e1e1e; /* 深色背景 */
 }
 
 /* 成交線 */
@@ -90,10 +134,91 @@ footer {
     font-size: 12px; /* 縮小字體 */
     text-align: center; /* 水平置中 */
     margin-top: 20px; /* 預留空間讓頁尾有呼吸感 */
+    color: #b0b0b0; /* 淺灰色文字 */
 }
 
 footer a {
-    color: gray; /* 超連結顏色灰色 */
+    color: #b0b0b0; /* 淺灰色超連結 */
     font-weight: bold; /* 超連結字體加粗 */
     text-decoration: none; /* 移除超連結底線 */
+}
+
+
+
+
+
+select {
+    background-color: #333;     /* 背景深色 */
+    color: #fff;                /* 字體顏色 */
+    border: 1px solid #555;     /* 邊框深灰 */
+    border-radius: 5px;         /* 圓角 */
+    padding: 5px;               /* 內邊距 */
+    font-size: 14px;            /* 字體大小 */
+    appearance: none;           /* 隱藏原生箭頭 */
+    cursor: pointer;            /* 鼠標變成手型 */
+    transition: all 0.3s ease;  /* 過渡效果 */
+}
+
+/* 下拉清單懸停效果 */
+select:hover {
+    background-color: #444;     /* 背景稍微變亮 */
+    border-color: #666;         /* 邊框變深 */
+}
+
+/* 下拉清單展開的樣式 */
+select:focus {
+    outline: none;              /* 移除聚焦外框 */
+    border-color: #888;         /* 聚焦邊框變亮 */
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* 發光效果 */
+}
+
+/* 下拉清單選項樣式 */
+option {
+    background-color: #333;     /* 選項背景深色 */
+    color: #fff;                /* 選項文字白色 */
+}
+
+
+/* 核取方塊容器 */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;                  /* 標籤與方塊之間距離 */
+}
+
+/* 自定義核取方塊 */
+input[type="checkbox"] {
+    appearance: none;           /* 隱藏原生方塊 */
+    width: 18px;
+    height: 18px;
+    background-color: #333;     /* 背景深色 */
+    border: 2px solid #555;     /* 邊框顏色 */
+    border-radius: 4px;         /* 圓角 */
+    cursor: pointer;            /* 鼠標變成手型 */
+    transition: all 0.3s ease;  /* 過渡效果 */
+}
+
+/* 核取方塊選中狀態 */
+input[type="checkbox"]:checked {
+    background-color: #0056b3;  /* 勾選後背景藍色 */
+    border-color: #004b9a;      /* 邊框同步改變 */
+    position: relative;
+}
+
+/* 勾選後的對勾圖標 */
+input[type="checkbox"]:checked::after {
+    content: '';                /* 加入勾選符號 */
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;         /* 勾選符號顏色白色 */
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);   /* 旋轉形成對勾 */
+}
+
+/* 懸停效果 */
+input[type="checkbox"]:hover {
+    border-color: #888;         /* 邊框變亮 */
 }

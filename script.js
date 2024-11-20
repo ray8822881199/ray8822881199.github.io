@@ -77,16 +77,23 @@ $(document).ready(function () {
     // 建倉表事件 拖拉
     $(document).off('mousemove').on('mousemove', function (e) {
         if (isBuilding) {
+            const nowCell = $(document.elementFromPoint(startCell.offset().left - window.scrollX, e.pageY - window.scrollY))
             const offset = startCell.offset();
             const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call')?0.25:0.75)-(startCell.hasClass('call')?linewidth:0);
             const startY = offset.top + startCell.outerHeight() * 0.5;
             const endX = e.pageX;
             const endY = e.pageY;
 
-            $('td:hover').css({
-                'background-color': e.button === 0 ? '#f0fff0' : '#fff0f0'
-            });
-
+            if(nowCell.hasClass('call')){
+                nowCell.css({
+                    'background-color': '#7e0104'
+                });
+            }
+            if(nowCell.hasClass('put')){
+                nowCell.css({
+                    'background-color': '#045b1c'
+                });
+            }
             tradeLine.css({
                 'width': linewidth,
                 'height': Math.max(endY-startY,startY-endY),
@@ -156,10 +163,25 @@ $(document).ready(function () {
                 </tr></tr>
             `);
             if(items==i){
-                row.css({'background-color': '#b1fafa'});
+                row.css({'background-color': '#5e5e5e'});
             }
             $('#optionTable tbody').append(row);
         }
+    }
+
+    function updatePositions(row) {
+        const positionId = row.data('id');
+        const type = row.find('.position-select').val();
+        const strikePrice = parseFloat(row.find('.strike-price').val()) || 0;
+        const cost = parseFloat(row.find('.cost').val()) || 0;
+        const quantity = parseFloat(row.find('.quantity').val()) || 0;
+        const istest = row.find('.istest').is(':checked');
+        const isactive = row.find('.isactive').is(':checked');
+        const isclosed = row.find('.isclosed').is(':checked');
+        const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
+        positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
+        //console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
+        //console.log(calculateOptionMargin(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
     }
 
     function calculateOptionMargin(strikePrice, optionType, positionType, premium) {
@@ -180,21 +202,6 @@ $(document).ready(function () {
                     Math.max((underlyingPrice - strikePrice) * contractMultiplier, 0);
             return premium * contractMultiplier + Math.max(a - outOfTheMoneyValue, b); // 賣出選擇權，計算保證金
         }
-    }
-
-    function updatePositions(row) {
-        const positionId = row.data('id');
-        const type = row.find('.position-select').val();
-        const strikePrice = parseFloat(row.find('.strike-price').val()) || 0;
-        const cost = parseFloat(row.find('.cost').val()) || 0;
-        const quantity = parseFloat(row.find('.quantity').val()) || 0;
-        const istest = row.find('.istest').is(':checked');
-        const isactive = row.find('.isactive').is(':checked');
-        const isclosed = row.find('.isclosed').is(':checked');
-        const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
-        positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
-        //console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
-        //console.log(calculateOptionMargin(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
     }
 
     //增加持倉項目
@@ -222,8 +229,7 @@ $(document).ready(function () {
                 <td><input type="text" class="close-amount" placeholder="平倉點數" /></td>
                 <td><button class="remove-btn">移除</button></td>
             </tr>
-        `);
-        
+        `); 
 
         // 動態加入選項
         positionOptions.forEach(option => {
@@ -457,8 +463,23 @@ $(document).ready(function () {
             onlyTestData.push([profitPrice[i], onlyTestProfit[i]*contractMultiplier]);
         }
 
+        // 夜間模式配色配置
+        const nightModeColors = {
+            backgroundColor: '#2c343c', // 背景色
+            textColor: '#dcdcdc',       // 通用文字顏色
+            axisLineColor: '#888',      // 軸線顏色
+            gridColor: '#555',          // 網格線顏色
+            legendTextColor: '#dcdcdc', // 圖例文字顏色
+            seriesColors: {
+                position: 'cyan',       // 持倉線顏色
+                applied: 'orange',      // 套用後線顏色
+                test: 'red',            // 測試倉線顏色
+            }
+        };
+
         // 更新圖表
         chart.setOption({
+            backgroundColor: nightModeColors.backgroundColor, // 背景顏色
             tooltip: {
                 trigger: 'axis',
                 formatter: function (params) {
@@ -470,21 +491,46 @@ $(document).ready(function () {
                 },
             },
             legend: {
-                show: true,  // 開啟圖例
-                //data: ['持倉', '套用後', '測試倉'],  // 顯示的圖例名稱
+                show: true, // 開啟圖例
                 textStyle: {
-                    color: '#333',  // 設置圖例文字顏色
+                    color: nightModeColors.legendTextColor, // 圖例文字顏色
                 }
             },
             xAxis: {
                 type: 'value',
                 name: '最終收盤價格',
+                nameTextStyle: {
+                    color: nightModeColors.textColor // X軸名稱顏色
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: nightModeColors.axisLineColor // X軸線顏色
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: nightModeColors.gridColor // 網格線顏色
+                    }
+                },
                 min: priceRange.min,
                 max: priceRange.max,
             },
             yAxis: {
                 type: 'value',
                 name: '損益',
+                nameTextStyle: {
+                    color: nightModeColors.textColor // Y軸名稱顏色
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: nightModeColors.axisLineColor // Y軸線顏色
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: nightModeColors.gridColor // 網格線顏色
+                    }
+                },
             },
             series: [{
                 name: '持倉',
@@ -494,12 +540,12 @@ $(document).ready(function () {
                 emphasis: {
                     focus: 'series',
                 },
-                color: 'blue',  // 設定黃色
+                color: nightModeColors.seriesColors.position, // 設定線顏色
                 lineStyle: {
-                    type: 'solid',    // 設定實線
-                    width: 2          // 設定線寬，視需要可調整
+                    type: 'solid', // 設定實線
+                    width: 2       // 設定線寬，視需要可調整
                 }
-            },{
+            }, {
                 name: '套用後',
                 type: 'line',
                 data: totalTestData,
@@ -507,12 +553,12 @@ $(document).ready(function () {
                 emphasis: {
                     focus: 'series',
                 },
-                color: 'blue',  // 設定黃色
+                color: nightModeColors.seriesColors.applied, // 設定線顏色
                 lineStyle: {
-                    type: 'dashed',    // 設定實線
-                    width: 2          // 設定線寬，視需要可調整
+                    type: 'dashed', // 設定虛線
+                    width: 2       // 設定線寬，視需要可調整
                 }
-            },{
+            }, {
                 name: '測試倉',
                 type: 'line',
                 data: onlyTestData,
@@ -520,10 +566,10 @@ $(document).ready(function () {
                 emphasis: {
                     focus: 'series',
                 },
-                color: 'red',  // 設定紅色
+                color: nightModeColors.seriesColors.test, // 設定線顏色
                 lineStyle: {
                     type: 'dashed', // 設定虛線
-                    width: 2  // 設定線寬，視需要可調整
+                    width: 2       // 設定線寬，視需要可調整
                 }
             }],
         });
