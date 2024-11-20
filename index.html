@@ -32,18 +32,19 @@
         <div class="container">
             <div id="main_config">
                 <button id="addPosition">新增倉位</button>
-                <button id="comfirmPosition">測試倉轉持倉</button>
+                <button id="comfirmPosition">測試倉套用</button>
                 <span>
                     <label for="market-price">大盤價平</label>
                     <input type="text" id="market-price" class="overall_config market-price" placeholder="大盤價平" />
                 </span>
                 <span>
                     <label for="analysis-width">分析寬度</label>
-                    <input type="text" id="analysis-width" class="overall_config analysis-width" placeholder="分析寬度" />
+                    <input type="range" id="analysis-width" class="overall_config analysis-width" placeholder="分析寬度" min="1" max="10"/>
                 </span>
                 <span>
                     <label for="precision">精細度</label>
-                    <input type="text" id="precision" class="overall_config precision" placeholder="精細度" />
+                    
+                    <input type="range" id="precision" class="overall_config precision" placeholder="精細度" min="50" max="200"/>
                 </span>
             </div>
             <div id="chart"></div>
@@ -58,6 +59,7 @@
                         <th>是否計算</th>
                         <th>已平倉</th>
                         <th>平倉點數</th>
+                        <th>組合</th>
                         <th>操作</th>
                     </tr>
                 </thead>

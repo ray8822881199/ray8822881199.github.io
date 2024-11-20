@@ -5,7 +5,7 @@
  */
 
 window.underlyingPrice=22500; // 價平
-window.analysisWidth = 0.06; // 價位寬度
+window.analysisWidth = 6; // 價位寬度 = 價平漲跌幅*100
 window.part = 100; // 切成幾分
 
 window.contractMultiplier=50; // 每點價值
@@ -30,7 +30,7 @@ $(document).ready(function () {
         { id: 'sell_put', text: 'Sell Put' }
     ];
 
-    let priceRange = { min: underlyingPrice*(1-analysisWidth), max: underlyingPrice*(1+analysisWidth) }; // 收盤價格範圍（可調整）
+    let priceRange = { min: underlyingPrice*(1-analysisWidth/100), max: underlyingPrice*(1+analysisWidth/100) }; // 收盤價格範圍（可調整）
     let point=50; // 每檔間隔
     let linewidth=5; // 建倉表拖拉線寬
     let isBuilding = false; // 是否處於建倉模式
@@ -43,17 +43,16 @@ $(document).ready(function () {
 
     // 配置區更新
     $('.overall_config').on('change',function () {
-
         underlyingPrice = Number($('#market-price').val()||underlyingPrice);
         analysisWidth = Number($('#analysis-width').val()||analysisWidth);
         part = Number($('#precision').val()||part);
-        priceRange = { min: underlyingPrice*(1-analysisWidth), max: underlyingPrice*(1+analysisWidth) };
-
+        priceRange = { min: underlyingPrice*(1-analysisWidth/100), max: underlyingPrice*(1+analysisWidth/100) };
+        console.log(analysisWidth);
         updateOptionTable();
         updateChart();
     });
     // 新增倉位
-    $('#addPosition').off('click').on('click', () => addItem(0, 0));
+    $('#addPosition').off('click').on('click', () => addItem(0, 0,''));
 
     // 測試倉轉持倉
     $('#comfirmPosition').off('click').on('click', function(){
@@ -108,16 +107,30 @@ $(document).ready(function () {
                 const starttype = startCell.hasClass('call') ? 'buy_call' : 'buy_put';
                 const endtype = endCell.hasClass('call') ? 'sell_call' : 'sell_put';
 
+                const groupId = Math.max(
+                    ...$('tr[data-id] .groupId').map(function () {
+                        const value = $(this).val();
+                        const numberPart = value.match(/\d+/); // 提取數字部分
+                        return numberPart ? Number(numberPart[0]) : 0;
+                    }).get(), 
+                    0 // 當沒有任何 groupId 時，返回 -1
+                ) + 1;
+
+                const groupCode = 
+                    (endPrice>startPrice ? 'Bull ':'Bear ')+
+                    (startCell.hasClass('call') ? 'Call Spread ':'Put Spread ')+
+                    groupId;
+
                 if(e.button === 0){
-                    addItem(starttype,startPrice);
                     if(startPrice!==endPrice){
-                        addItem(endtype,endPrice);
+                        addItem(starttype,startPrice,groupCode);
+                        addItem(endtype,endPrice,groupCode);
+                    }else{
+                        addItem(starttype,startPrice,'');
                     }
                 }else if(startPrice==endPrice){
-                    addItem(endtype,endPrice);
+                    addItem(endtype,endPrice,'');
                 }
-
-                updateChart();
                 updateOptionTable();
             }
         }
@@ -140,6 +153,29 @@ $(document).ready(function () {
     updateChart();
     updateOptionTable();
 
+    function groupPositionsByGroupId(totalPositions) {
+        const grouped = {};  // 用來存儲按 groupId 分組的結果
+        const noGroup = [];  // 用來存儲沒有 groupId 的項目
+
+        totalPositions.forEach(position => {
+            const { groupId, positionId } = position;
+            if (groupId) {
+                // 如果有 groupId，將 positionId 加入相應的 groupId 陣列
+                if (!grouped[groupId]) {
+                    grouped[groupId] = [];  // 如果這個 groupId 還沒出現過，先創建一個空陣列
+                }
+                grouped[groupId].push(positionId);
+            } else {
+                // 如果沒有 groupId，將這筆資料放入 noGroup 陣列
+                noGroup.push([positionId]);
+            }
+        });
+
+        // 將 grouped 與 noGroup 合併
+        const groupedArray = Object.keys(grouped).map(groupId => grouped[groupId]);
+        return [...groupedArray, ...noGroup];
+    }
+
     function updateOptionTable() {
         $('#optionTable tbody').html('');
         let base=Math.round(underlyingPrice/point,0)*point;
@@ -159,7 +195,7 @@ $(document).ready(function () {
     }
 
     function updatePositions(row) {
-        const positionId = row.data('id');
+        const positionId = Number(row.data('id'));
         const type = row.find('.position-select').val();
         const strikePrice = parseFloat(row.find('.strike-price').val()) || 0;
         const cost = parseFloat(row.find('.cost').val()) || 0;
@@ -168,18 +204,22 @@ $(document).ready(function () {
         const isactive = row.find('.isactive').is(':checked');
         const isclosed = row.find('.isclosed').is(':checked');
         const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
-        positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
-        //console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
-        //console.log(calculateOptionMargin(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
+        const groupId = row.find('.groupId').val() || '';
+        const pos = positions.find((p) => p.positionId === positionId);
+        if(pos){
+            Object.assign(pos, {type,strikePrice,cost,quantity,istest,isactive,isclosed,closeAmount,groupId});
+        }else{
+            positions.push({type,strikePrice,cost,quantity,istest,isactive,isclosed,closeAmount,positionId,groupId});
+        }
     }
 
-    function calculateOptionMargin(strikePrice, optionType, positionType, premium) {
+    function calculateOptionMargin(strikePrice, optionType, positionType, premium, price) {
         if (positionType === 'buy') {
             throw new Error('無效的持倉類型，僅支持 "sell"。');
         }
         let a = AValue, b = BValue;
         // 計算價內外距離，調整 AValue 和 BValue
-        const distance = Math.abs(underlyingPrice - strikePrice);
+        const distance = Math.abs(price - strikePrice);
         if (distance >= 500) {
             a *= distance < 1000 ? 1.2 : 1.5;
             b *= distance < 1000 ? 1.2 : 1.5;
@@ -187,14 +227,14 @@ $(document).ready(function () {
         if (positionType === 'sell') {
             const outOfTheMoneyValue = 
                 optionType === 'call' ? 
-                    Math.max((strikePrice - underlyingPrice) * contractMultiplier, 0) : 
-                    Math.max((underlyingPrice - strikePrice) * contractMultiplier, 0);
+                    Math.max((strikePrice - price) * contractMultiplier, 0) : 
+                    Math.max((price - strikePrice) * contractMultiplier, 0);
             return premium * contractMultiplier + Math.max(a - outOfTheMoneyValue, b); // 賣出選擇權，計算保證金
         }
     }
 
     //增加持倉項目
-    function addItem(itemType, itemPrice) {
+    function addItem(itemType, itemPrice, itemGroupId) {
 
         const positionId = Math.max(
             ...$('tr[data-id]').map(function () {
@@ -209,13 +249,14 @@ $(document).ready(function () {
                         <option value="" disabled selected>選擇類型</option>
                     </select>
                 </td>
-                <td><input type="text" class="strike-price" placeholder="持倉點位" /></td>
-                <td><input type="text" class="cost" placeholder="建倉成本" /></td>
+                <td><input type="number" class="strike-price" placeholder="持倉點位" /></td>
+                <td><input type="number" class="cost" placeholder="建倉成本" /></td>
                 <td><input type="number" class="quantity" placeholder="持倉數量" value="1" /></td>
                 <td><input type="checkbox" class="istest" checked/></td>
                 <td><input type="checkbox" class="isactive" checked/></td>
                 <td><input type="checkbox" class="isclosed"/></td>
-                <td><input type="text" class="close-amount" placeholder="平倉點數" /></td>
+                <td><input type="number" class="close-amount" placeholder="平倉點數" /></td>
+                <td><input type="text" class="groupId" placeholder="分組標籤" /></td>
                 <td><button class="remove-btn">移除</button></td>
             </tr>
         `); 
@@ -231,6 +272,9 @@ $(document).ready(function () {
         }
         if (itemPrice) {
             row.find('.strike-price').val(itemPrice); // 填充持倉點位
+        }
+        if (itemGroupId) {
+            row.find('.groupId').val(itemGroupId); // 填充 groupId
         }
 
         // 觸發更新
@@ -252,13 +296,12 @@ $(document).ready(function () {
         });
     }
 
-    function calculateComboMarginAndPremium(positionIds) {
+    function calculateComboMarginAndPremium(positionIds, price) {
 
         if (positionIds.length !== 1 && positionIds.length !== 2) {
             throw new Error('僅支援一個或兩個 positionId 的組合計算。');
         }
         // 初始化變數
-        let groupId = new Date().getTime(); // 使用時間戳作為分組ID
         let margin = 0;
         let premiumReceived = 0;
         let premiumPaid = 0;
@@ -280,9 +323,15 @@ $(document).ready(function () {
             // 計算
             premiumReceived = isSell ? position.cost * position.quantity : 0;
             premiumPaid = isBuy ? position.cost * position.quantity : 0;
-            margin = isSell ? calculateOptionMargin(position.strikePrice, optionType, 'sell', position.cost) : 0;
+            margin = isSell ? calculateOptionMargin(position.strikePrice, optionType, 'sell', position.cost, price) : 0;
 
-            return [positionIds[0], null, margin, premiumReceived, premiumPaid, groupId];
+            return {
+                p1: positionIds[0],
+                p2: null,
+                margin: margin,
+                premiumReceived: premiumReceived,
+                premiumPaid: premiumPaid
+            };
         }
 
         // 持倉分類
@@ -316,11 +365,11 @@ $(document).ready(function () {
 
         // 計算價差單保證金
         const calculateSpreadMargin = (longPos, shortPos) => {
-            return (longPos.strikePrice - shortPos.strikePrice) * longPos.quantity;
+            return (longPos.strikePrice - shortPos.strikePrice) * longPos.quantity * contractMultiplier;
         };
         if (scPos && spPos) {
-            const scMargin = calculateOptionMargin(scPos.strikePrice, 'call', 'sell', scPos.cost);
-            const spMargin = calculateOptionMargin(spPos.strikePrice, 'put', 'sell', spPos.cost);
+            const scMargin = calculateOptionMargin(scPos.strikePrice, 'call', 'sell', scPos.cost, price);
+            const spMargin = calculateOptionMargin(spPos.strikePrice, 'put', 'sell', spPos.cost, price);
             const minPos = scMargin > spMargin ? spPos : scPos;
             margin = (Math.max(scMargin, spMargin) + minPos.cost * contractMultiplier + CValue) * scPos.quantity; 
         } else if (bcPos && scPos) {
@@ -330,14 +379,13 @@ $(document).ready(function () {
         }
 
         // 返回結果
-        return [
-            positionIds[0],
-            positionIds[1],
-            margin,
-            premiumReceived,
-            premiumPaid,
-            groupId
-        ];
+        return {
+            p1: positionIds[0],
+            p2: positionIds[1],
+            margin: margin,
+            premiumReceived: premiumReceived,
+            premiumPaid: premiumPaid
+        };
     }
 
     // 初始化圖表
@@ -356,10 +404,27 @@ $(document).ready(function () {
         const totalData = [];
         const totalTestData = [];
         const onlyTestData = [];
+        const marginData = [];
         const profitPrice = new Array(part).fill(0); // 價位陣列
         const totalProfit = new Array(part).fill(0); // 持倉單總損益陣列
         const testTotalProfit = new Array(part).fill(0); // 測試單加持倉單總損益陣列
         const onlyTestProfit = new Array(part).fill(0); // 僅測試單損益陣列
+
+        const totalMargin = new Array(part).fill(0); // 保證金陣列
+
+        //更新分組資料
+        const groupPositions = groupPositionsByGroupId(positions);
+
+        // 測試加持倉的保證金
+        for (let i = 0; i <= part; i++) {
+            let closingPrice = priceRange.min + (priceRange.max - priceRange.min) / part * i;
+            groupPositions.forEach((ps, index) => {
+                // 計算每個 position 組合的保證金和權利金
+                const marginData = calculateComboMarginAndPremium(ps, closingPrice);
+                // 假設 marginData[2] 是我們要累加的數值
+                totalMargin[i] += marginData.margin;
+            });
+        }
 
         // 遍歷每個倉位
         positions.forEach((pos, index) => {
@@ -449,6 +514,7 @@ $(document).ready(function () {
             totalData.push([profitPrice[i], totalProfit[i]*contractMultiplier]);
             totalTestData.push([profitPrice[i], testTotalProfit[i]*contractMultiplier]);
             onlyTestData.push([profitPrice[i], onlyTestProfit[i]*contractMultiplier]);
+            marginData.push([profitPrice[i], totalMargin[i]]);
         }
 
         // 夜間模式配色配置
@@ -565,6 +631,19 @@ $(document).ready(function () {
                     type: 'dashed', // 設定虛線
                     width: 2       // 設定線寬，視需要可調整
                 }
+            }, {
+                name: '保證金',
+                type: 'line',
+                data: marginData,
+                symbol: 'none',
+                emphasis: {
+                    focus: 'series',
+                },
+                color: nightModeColors.seriesColors.test, // 設定線顏色
+                lineStyle: {
+                    type: 'solid', // 設定虛線
+                    width: 4       // 設定線寬，視需要可調整
+                }
             }],
         });
     }
@@ -575,10 +654,3 @@ $(document).ready(function () {
 
 
 
-
-//拆倉
-//組單
-//計算整串的保證金
-
-//匯出CSV
-//匯入CSV
