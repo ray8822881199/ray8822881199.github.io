@@ -53,9 +53,8 @@ $(document).ready(function () {
         updateChart();
     });
     // 新增倉位
-    $('#addPosition').off('click').on('click', function(){
-        addItem(0, 0);
-    });
+    $('#addPosition').off('click').on('click', () => addItem(0, 0));
+
     // 測試倉轉持倉
     $('#comfirmPosition').off('click').on('click', function(){
         $('.istest:checked').each(function(){
@@ -84,16 +83,9 @@ $(document).ready(function () {
             const endX = e.pageX;
             const endY = e.pageY;
 
-            if(nowCell.hasClass('call')){
-                nowCell.css({
-                    'background-color': '#7e0104'
-                });
-            }
-            if(nowCell.hasClass('put')){
-                nowCell.css({
-                    'background-color': '#045b1c'
-                });
-            }
+            if (nowCell.hasClass('call')) {nowCell.css('background-color', '#7e0104')};
+            if (nowCell.hasClass('put')) {nowCell.css('background-color', '#045b1c')};
+
             tradeLine.css({
                 'width': linewidth,
                 'height': Math.max(endY-startY,startY-endY),
@@ -117,17 +109,14 @@ $(document).ready(function () {
                 const endtype = endCell.hasClass('call') ? 'sell_call' : 'sell_put';
 
                 if(e.button === 0){
-                    if(startPrice==endPrice){
-                        addItem(starttype,startPrice);
-                    }else{
-                        addItem(starttype,startPrice);
+                    addItem(starttype,startPrice);
+                    if(startPrice!==endPrice){
                         addItem(endtype,endPrice);
                     }
-                }else{
-                    if(startPrice==endPrice){
-                        addItem(endtype,endPrice);
-                    }
+                }else if(startPrice==endPrice){
+                    addItem(endtype,endPrice);
                 }
+
                 updateChart();
                 updateOptionTable();
             }
@@ -453,7 +442,6 @@ $(document).ready(function () {
                 profitPrice[i] = closingPrice;
             }
 
-
         });
 
         // 組合總損益數據
@@ -470,6 +458,7 @@ $(document).ready(function () {
             axisLineColor: '#888',      // 軸線顏色
             gridColor: '#555',          // 網格線顏色
             legendTextColor: '#dcdcdc', // 圖例文字顏色
+            titleTextColor: '#dcdcdc',  // 標題文字顏色
             seriesColors: {
                 position: 'cyan',       // 持倉線顏色
                 applied: 'orange',      // 套用後線顏色
@@ -480,6 +469,11 @@ $(document).ready(function () {
         // 更新圖表
         chart.setOption({
             backgroundColor: nightModeColors.backgroundColor, // 背景顏色
+            title: {
+                textStyle: {
+                    color: nightModeColors.titleTextColor, // 標題文字顏色
+                }
+            },
             tooltip: {
                 trigger: 'axis',
                 formatter: function (params) {
@@ -582,4 +576,9 @@ $(document).ready(function () {
 
 
 
+//拆倉
+//組單
+//計算整串的保證金
 
+//匯出CSV
+//匯入CSV

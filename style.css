@@ -23,8 +23,8 @@ button {
     background-color: #444;    /* 按鈕背景深灰色 */
     color: #fff;               /* 按鈕文字白色 */
     border: 1px solid #555;    /* 邊框略深，提供層次 */
-    border-radius: 5px;        /* 圓角 */
-    padding: 10px 20px;        /* 增加按鈕內邊距 */
+    border-radius: 3px;        /* 圓角 */
+    padding: 5px 20px;        /* 增加按鈕內邊距 */
     font-size: 14px;           /* 文字大小適中 */
     cursor: pointer;           /* 鼠標指針樣式 */
     transition: all 0.3s ease; /* 平滑過渡效果 */
@@ -42,7 +42,9 @@ button:active {
     transform: scale(0.98);    /* 按下時縮小一點 */
 }
 
-
+#opknows {
+    display: block;
+}
 
 
 
@@ -84,6 +86,12 @@ button:active {
 #positions {
     width: 100%;
     background-color: #1e1e1e; /* 深色背景 */
+}
+#positions thead {
+    position: sticky;
+    top: 0;
+    background-color: #222;
+    z-index: 1;
 }
 #positions th,
 #positions td {
@@ -151,7 +159,7 @@ select {
     background-color: #333;     /* 背景深色 */
     color: #fff;                /* 字體顏色 */
     border: 1px solid #555;     /* 邊框深灰 */
-    border-radius: 5px;         /* 圓角 */
+    border-radius: 3px;         /* 圓角 */
     padding: 5px;               /* 內邊距 */
     font-size: 14px;            /* 字體大小 */
     appearance: none;           /* 隱藏原生箭頭 */
@@ -193,7 +201,7 @@ input[type="checkbox"] {
     height: 18px;
     background-color: #333;     /* 背景深色 */
     border: 2px solid #555;     /* 邊框顏色 */
-    border-radius: 4px;         /* 圓角 */
+    border-radius: 3px;         /* 圓角 */
     cursor: pointer;            /* 鼠標變成手型 */
     transition: all 0.3s ease;  /* 過渡效果 */
 }
@@ -221,4 +229,29 @@ input[type="checkbox"]:checked::after {
 /* 懸停效果 */
 input[type="checkbox"]:hover {
     border-color: #888;         /* 邊框變亮 */
+}
+
+
+/* 設定滾動條外觀 */
+::-webkit-scrollbar {
+    width: 12px; /* 設定垂直滾動條寬度 */
+    height: 12px; /* 設定水平滾動條高度 */
+}
+
+/* 設定滾動條的背景 */
+::-webkit-scrollbar-track {
+    background-color: #2c2c2c; /* 滾動條背景色，適合深色模式 */
+    border-radius: 10px; /* 邊角圓滑 */
+}
+
+/* 設定滾動條的滑塊 */
+::-webkit-scrollbar-thumb {
+    background-color: #555555; /* 滑塊顏色，較亮的灰色 */
+    border-radius: 10px; /* 滑塊圓角 */
+    border: 2px solid #333333; /* 邊框顏色，增強可見性 */
+}
+
+/* 滾動條滑塊在懸停時 */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #777777; /* 滑塊懸停時顏色 */
 }
