@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 /*
  * Copyright © 2024 Ray. All Rights Reserved.
- * 本作品採用 CC BY-NC-SA 4.0 授權條款，允許非商業性質的轉載與修改，但需註明來源並以相同條件分享。
+ * 本網站上所有內容，包括文字、圖形、標誌、設計以及源代碼，均受到適用的著作權法律保護。  未經授權，嚴禁用於商業或非法用途的複製、分發或修改。  
  */
 
 window.underlyingPrice=22500; // 價平
@@ -9,9 +9,23 @@ window.analysisWidth = 6; // 價位寬度 = 價平漲跌幅*100
 window.part = 100; // 切成幾分
 
 window.contractMultiplier=50; // 每點價值
-window.AValue=81000;
-window.BValue=41000;
-window.CValue=8200;
+
+window.marginInfo={
+    // 原始保證金
+    od:{
+        miniMargin: 80500,
+        AValue: 81000,
+        BValue: 41000,
+        CValue: 8200
+    },
+    // 維持保證金
+    mm:{
+        miniMargin: 61750,
+        AValue: 63000,
+        BValue: 32000,
+        CValue: 6400
+    }
+};
 
 window.items=20; // 價平上下檔數
 window.positions = []; // 存放所有持倉數據
@@ -213,11 +227,20 @@ $(document).ready(function () {
         }
     }
 
-    function calculateOptionMargin(strikePrice, optionType, positionType, premium, price) {
+    function calculateOptionMargin(strikePrice, optionType, positionType, premium, price, isOriginal) {
         if (positionType === 'buy') {
             throw new Error('無效的持倉類型，僅支持 "sell"。');
         }
-        let a = AValue, b = BValue;
+
+        let a = 0, b = 0;
+        if(isOriginal){
+            a = marginInfo.od.AValue || 0;
+            b = marginInfo.od.BValue || 0;
+        }else{
+            a = marginInfo.mm.AValue || 0;
+            b = marginInfo.mm.BValue || 0;
+        }
+
         // 計算價內外距離，調整 AValue 和 BValue
         const distance = Math.abs(price - strikePrice);
         if (distance >= 500) {
@@ -296,7 +319,7 @@ $(document).ready(function () {
         });
     }
 
-    function calculateComboMarginAndPremium(positionIds, price) {
+    function calculateComboMarginAndPremium(positionIds, price, isOriginal) {
 
         if (positionIds.length !== 1 && positionIds.length !== 2) {
             throw new Error('僅支援一個或兩個 positionId 的組合計算。');
@@ -317,13 +340,21 @@ $(document).ready(function () {
             const [positionType, optionType] = position.type.split('_');
             const isSell = positionType === 'sell';
             const isBuy = positionType === 'buy';
-            if (!isSell && !isBuy) {
+            const isMini = optionType === 'mini';
+
+            if (!isSell && !isBuy && !isMini) {
                 throw new Error('無效的持倉類型。');
             }
             // 計算
             premiumReceived = isSell ? position.cost * position.quantity : 0;
             premiumPaid = isBuy ? position.cost * position.quantity : 0;
-            margin = isSell ? calculateOptionMargin(position.strikePrice, optionType, 'sell', position.cost, price) : 0;
+            margin = isSell ? calculateOptionMargin(position.strikePrice, optionType, 'sell', position.cost, price, isOriginal) : 0;
+
+            if(isMini){
+                premiumReceived = 0;
+                premiumPaid = 0;
+                margin = isOriginal ? marginInfo.od.miniMargin : marginInfo.mm.miniMargin;
+            }
 
             return {
                 p1: positionIds[0],
@@ -368,10 +399,11 @@ $(document).ready(function () {
             return (longPos.strikePrice - shortPos.strikePrice) * longPos.quantity * contractMultiplier;
         };
         if (scPos && spPos) {
-            const scMargin = calculateOptionMargin(scPos.strikePrice, 'call', 'sell', scPos.cost, price);
-            const spMargin = calculateOptionMargin(spPos.strikePrice, 'put', 'sell', spPos.cost, price);
+            const c = isOriginal ? marginInfo.od.CValue : marginInfo.mm.CValue;
+            const scMargin = calculateOptionMargin(scPos.strikePrice, 'call', 'sell', scPos.cost, price, isOriginal);
+            const spMargin = calculateOptionMargin(spPos.strikePrice, 'put', 'sell', spPos.cost, price, isOriginal);
             const minPos = scMargin > spMargin ? spPos : scPos;
-            margin = (Math.max(scMargin, spMargin) + minPos.cost * contractMultiplier + CValue) * scPos.quantity; 
+            margin = (Math.max(scMargin, spMargin) + minPos.cost * contractMultiplier + c) * scPos.quantity; 
         } else if (bcPos && scPos) {
             margin = bcPos.strikePrice > scPos.strikePrice ? calculateSpreadMargin(bcPos, scPos) : 0; 
         } else if (bpPos && spPos) {
@@ -404,13 +436,16 @@ $(document).ready(function () {
         const totalData = [];
         const totalTestData = [];
         const onlyTestData = [];
-        const marginData = [];
+        const od_marginData = [];
+        const mm_marginData = [];
+
         const profitPrice = new Array(part).fill(0); // 價位陣列
         const totalProfit = new Array(part).fill(0); // 持倉單總損益陣列
         const testTotalProfit = new Array(part).fill(0); // 測試單加持倉單總損益陣列
         const onlyTestProfit = new Array(part).fill(0); // 僅測試單損益陣列
 
-        const totalMargin = new Array(part).fill(0); // 保證金陣列
+        const od_totalMargin = new Array(part).fill(0); // 保證金陣列
+        const mm_totalMargin = new Array(part).fill(0); // 保證金陣列
 
         //更新分組資料
         const groupPositions = groupPositionsByGroupId(positions);
@@ -420,9 +455,10 @@ $(document).ready(function () {
             let closingPrice = priceRange.min + (priceRange.max - priceRange.min) / part * i;
             groupPositions.forEach((ps, index) => {
                 // 計算每個 position 組合的保證金和權利金
-                const marginData = calculateComboMarginAndPremium(ps, closingPrice);
-                // 假設 marginData[2] 是我們要累加的數值
-                totalMargin[i] += marginData.margin;
+                const od_marginData = calculateComboMarginAndPremium(ps, closingPrice, true);
+                const mm_marginData = calculateComboMarginAndPremium(ps, closingPrice, false);
+                od_totalMargin[i] += od_marginData.margin;
+                mm_totalMargin[i] += mm_marginData.margin;
             });
         }
 
@@ -514,7 +550,8 @@ $(document).ready(function () {
             totalData.push([profitPrice[i], totalProfit[i]*contractMultiplier]);
             totalTestData.push([profitPrice[i], testTotalProfit[i]*contractMultiplier]);
             onlyTestData.push([profitPrice[i], onlyTestProfit[i]*contractMultiplier]);
-            marginData.push([profitPrice[i], totalMargin[i]]);
+            od_marginData.push([profitPrice[i], od_totalMargin[i]]);
+            mm_marginData.push([profitPrice[i], mm_totalMargin[i]]);
         }
 
         // 夜間模式配色配置
@@ -632,9 +669,9 @@ $(document).ready(function () {
                     width: 2       // 設定線寬，視需要可調整
                 }
             }, {
-                name: '保證金',
+                name: '原始保證金',
                 type: 'line',
-                data: marginData,
+                data: od_marginData,
                 symbol: 'none',
                 emphasis: {
                     focus: 'series',
@@ -642,7 +679,20 @@ $(document).ready(function () {
                 color: nightModeColors.seriesColors.test, // 設定線顏色
                 lineStyle: {
                     type: 'solid', // 設定虛線
-                    width: 4       // 設定線寬，視需要可調整
+                    width: 1       // 設定線寬，視需要可調整
+                }
+            }, {
+                name: '維持保證金',
+                type: 'line',
+                data: mm_marginData,
+                symbol: 'none',
+                emphasis: {
+                    focus: 'series',
+                },
+                color: nightModeColors.seriesColors.test, // 設定線顏色
+                lineStyle: {
+                    type: 'solid', // 設定虛線
+                    width: 1       // 設定線寬，視需要可調整
                 }
             }],
         });
