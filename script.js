@@ -11,6 +11,7 @@ window.part = 100; // 切成幾分
 window.contractMultiplier=50; // 每點價值
 window.AValue=81000;
 window.BValue=41000;
+window.CValue=8200;
 
 window.items=20; // 價平上下檔數
 window.positions = []; // 存放所有持倉數據
@@ -161,43 +162,23 @@ $(document).ready(function () {
         }
     }
 
-    function calculateOptionMarginOrPremium(
-        strikePrice,
-        optionType,       // 'call' 或 'put'
-        positionType,     // 'buy' 或 'sell'
-        premium
-    ) {
-        // 權利金市值
-        const premiumValue = premium * contractMultiplier;
-        let a=AValue;
-        let b=BValue;
-
+    function calculateOptionMargin(strikePrice, optionType, positionType, premium) {
+        if (positionType === 'buy') {
+            throw new Error('無效的持倉類型，僅支持 "sell"。');
+        }
+        let a = AValue, b = BValue;
         // 計算價內外距離，調整 AValue 和 BValue
         const distance = Math.abs(underlyingPrice - strikePrice);
-        if (distance >= 500 && distance < 1000) {
-            a *= 1.2;
-            b *= 1.2;
-        } else if (distance >= 1000) {
-            a *= 1.5;
-            b *= 1.5;
+        if (distance >= 500) {
+            a *= distance < 1000 ? 1.2 : 1.5;
+            b *= distance < 1000 ? 1.2 : 1.5;
         }
-
-        // 持倉類型處理
-        if (positionType === 'buy') {
-            // 買進選擇權，只需支付權利金
-            return premiumValue;
-        } else if (positionType === 'sell') {
-            // 賣出選擇權，計算保證金
-            const outOfTheMoneyValue =
-                optionType === 'call'
-                    ? Math.max((strikePrice - underlyingPrice) * contractMultiplier, 0)
-                    : Math.max((underlyingPrice - strikePrice) * contractMultiplier, 0);
-
-            // 計算保證金
-            const margin = premiumValue + Math.max(a - outOfTheMoneyValue, b);
-            return margin;
-        } else {
-            throw new Error('無效的持倉類型，僅支持 "buy" 或 "sell"。');
+        if (positionType === 'sell') {
+            const outOfTheMoneyValue = 
+                optionType === 'call' ? 
+                    Math.max((strikePrice - underlyingPrice) * contractMultiplier, 0) : 
+                    Math.max((underlyingPrice - strikePrice) * contractMultiplier, 0);
+            return premium * contractMultiplier + Math.max(a - outOfTheMoneyValue, b); // 賣出選擇權，計算保證金
         }
     }
 
@@ -212,8 +193,8 @@ $(document).ready(function () {
         const isclosed = row.find('.isclosed').is(':checked');
         const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
         positions[positionId] = { type, strikePrice, cost, quantity, istest, isactive, isclosed, closeAmount, positionId };
-        console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
-        console.log(calculateOptionMarginOrPremium(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
+        //console.log(strikePrice,type.split('_')[1],type.split('_')[0],cost);
+        //console.log(calculateOptionMargin(strikePrice,type.split('_')[1],type.split('_')[0],cost)*quantity);
     }
 
     //增加持倉項目
@@ -274,6 +255,94 @@ $(document).ready(function () {
             // 更新圖表或其他動作
             updateChart();
         });
+    }
+
+    function calculateComboMarginAndPremium(positionIds) {
+
+        if (positionIds.length !== 1 && positionIds.length !== 2) {
+            throw new Error('僅支援一個或兩個 positionId 的組合計算。');
+        }
+        // 初始化變數
+        let groupId = new Date().getTime(); // 使用時間戳作為分組ID
+        let margin = 0;
+        let premiumReceived = 0;
+        let premiumPaid = 0;
+
+        // 先檢查所有 positionId 是否有效
+        const pos = positionIds.map(id => positions.find(p => p.positionId === id));
+        if (pos.includes(undefined)) throw new Error('無效的 positionId。');
+
+        // 單一持倉處理
+        if (positionIds.length === 1) {
+            // 檢查倉位
+            const position = pos[0];
+            const [positionType, optionType] = position.type.split('_');
+            const isSell = positionType === 'sell';
+            const isBuy = positionType === 'buy';
+            if (!isSell && !isBuy) {
+                throw new Error('無效的持倉類型。');
+            }
+            // 計算
+            premiumReceived = isSell ? position.cost * position.quantity : 0;
+            premiumPaid = isBuy ? position.cost * position.quantity : 0;
+            margin = isSell ? calculateOptionMargin(position.strikePrice, optionType, 'sell', position.cost) : 0;
+
+            return [positionIds[0], null, margin, premiumReceived, premiumPaid, groupId];
+        }
+
+        // 持倉分類
+        const { scPos, bcPos, spPos, bpPos } = pos.reduce((acc, p) => {
+            if (p.type === 'sell_call') acc.scPos = p;
+            if (p.type === 'buy_call') acc.bcPos = p;
+            if (p.type === 'sell_put') acc.spPos = p;
+            if (p.type === 'buy_put') acc.bpPos = p;
+            return acc;
+        }, {});
+        // 確定組合類型
+        const combo = [pos[0].type, pos[1].type].sort().join(',');
+        const validCombinations = [
+            'sell_call,sell_put',   // SC+SP
+            'buy_call,sell_call',   // BC+SC
+            'buy_put,sell_put'      // BP+SP
+        ];
+        // 檢查組合是否有效
+        if (!validCombinations.includes(combo)) {
+            throw new Error('不支持的組合類型。');
+        }
+        // 確保 SC 的履約價 >= SP 的履約價
+        if (combo === 'sell_call,sell_put' && scPos.strikePrice < spPos.strikePrice) {
+            throw new Error('SC 的履約價必須大於等於 SP 的履約價。');
+        }
+
+        // 計算權利金
+        const calculatePremium = (position) => position ? position.cost * position.quantity : 0;
+        premiumReceived = calculatePremium(scPos) + calculatePremium(spPos);
+        premiumPaid = calculatePremium(bcPos) + calculatePremium(bpPos);
+
+        // 計算價差單保證金
+        const calculateSpreadMargin = (longPos, shortPos) => {
+            return (longPos.strikePrice - shortPos.strikePrice) * longPos.quantity;
+        };
+        if (scPos && spPos) {
+            const scMargin = calculateOptionMargin(scPos.strikePrice, 'call', 'sell', scPos.cost);
+            const spMargin = calculateOptionMargin(spPos.strikePrice, 'put', 'sell', spPos.cost);
+            const minPos = scMargin > spMargin ? spPos : scPos;
+            margin = (Math.max(scMargin, spMargin) + minPos.cost * contractMultiplier + CValue) * scPos.quantity; 
+        } else if (bcPos && scPos) {
+            margin = bcPos.strikePrice > scPos.strikePrice ? calculateSpreadMargin(bcPos, scPos) : 0; 
+        } else if (bpPos && spPos) {
+            margin = bpPos.strikePrice > spPos.strikePrice ? 0 : calculateSpreadMargin(spPos, bpPos);
+        }
+
+        // 返回結果
+        return [
+            positionIds[0],
+            positionIds[1],
+            margin,
+            premiumReceived,
+            premiumPaid,
+            groupId
+        ];
     }
 
     // 初始化圖表
@@ -468,233 +537,3 @@ $(document).ready(function () {
 
 
 
-
-
-/*
-
-
-
-
-
-function getPairings(elements) {
-    let allPairings = []; // 儲存所有有效分組方式
-    let count = 0; // 記錄回溯次數
-
-    // 判斷是否為有效配對的函數
-    function isValidPair(a, b) {
-        const validPairs = [
-            ['buy_put', 'sell_put'],
-            ['sell_put', 'buy_put'],
-            ['buy_call', 'sell_call'],
-            ['sell_call', 'buy_call'],
-            ['sell_call', 'sell_put'],
-            ['sell_put', 'sell_call']
-        ];
-        return validPairs.some(pair => pair[0] === a.type && pair[1] === b.type);
-    }
-
-    // 回溯函數
-    function backtrack(remaining, currentPairs) {
-        count++;
-
-        // 如果沒有剩餘元素，表示成功分組
-        if (remaining.length === 0) {
-            allPairings.push([...currentPairs]);
-            return;
-        }
-
-        // 取出第一個元素
-        let first = remaining[0];
-        let canPair = false;
-
-        // 嘗試將 first 與其他元素配對
-        for (let i = 1; i < remaining.length; i++) {
-            let second = remaining[i];
-
-            // 判斷是否為有效配對
-            if (isValidPair(first, second)) {
-                let newRemaining = [...remaining.slice(1, i), ...remaining.slice(i + 1)];
-
-                currentPairs.push([first.positionId, second.positionId]); // 配對
-                backtrack(newRemaining, currentPairs); // 回溯
-                currentPairs.pop();
-
-                canPair = true;
-            }
-        }
-
-        // 如果無法配對，將 first 單獨成為一組
-        if (!canPair) {
-            currentPairs.push([first.positionId]);
-            backtrack(remaining.slice(1), currentPairs);
-            currentPairs.pop();
-        }
-    }
-
-    // 開始回溯
-    backtrack(elements, []);
-
-    console.log('回溯次數:', count);
-    console.log('去重前:', allPairings.length);
-
-    // 去重：將每個分組排序，並轉換為唯一標準形式
-    let uniquePairings = Array.from(
-        new Set(
-            allPairings.map(pairing =>
-                JSON.stringify(pairing.map(group => group.sort()).sort())
-            )
-        )
-    ).map(JSON.parse);
-
-    console.log('去重後:', uniquePairings.length);
-    return uniquePairings;
-}
-
-let elements = [
-    {type: "buy_call", positionId: 0},
-    {type: "buy_put", positionId: 1},
-    {type: "buy_put", positionId: 1},
-    {type: "buy_put", positionId: 1},
-    {type: "sell_call", positionId: 2},
-    {type: "sell_put", positionId: 3},
-    {type: "buy_call", positionId: 4},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "buy_put", positionId: 6},
-    {type: "sell_call", positionId: 7},
-    {type: "buy_call", positionId: 8},
-    {type: "buy_put", positionId: 9},
-    {type: "buy_put", positionId: 10},
-    {type: "buy_put", positionId: 10},
-    {type: "buy_put", positionId: 10},
-    {type: "sell_call", positionId: 11},
-    {type: "buy_put", positionId: 12},
-    {type: "sell_put", positionId: 13},
-    {type: "sell_call", positionId: 14}
-];
-
-
-
-// 執行測試
-console.time('計時名稱');
-let result = getPairings(elements);
-console.log('分組方式:', result);
-console.timeEnd('計時名稱');
-
-
-
-
-
-
-function getPairings(elements) {
-    let allPairings = []; // 儲存所有有效分組方式
-    
-    let count = 0; // 記錄回溯次數
-
-    // 判斷是否為有效配對的函數
-    function isValidPair(a, b) {
-        const validPairs = [
-            ['buy_put', 'sell_put'],
-            ['sell_put', 'buy_put'],
-            ['buy_call', 'sell_call'],
-            ['sell_call', 'buy_call'],
-            ['sell_call', 'sell_put'],
-            ['sell_put', 'sell_call']
-        ];
-        return validPairs.some(pair => pair[0] === a.type && pair[1] === b.type);
-    }
-
-    // 回溯函數
-    function backtrack(remaining, currentPairs) {
-        count++;
-
-        // 如果沒有剩餘元素，表示成功分組
-        if (remaining.length === 0) {
-            allPairings.push([...currentPairs]);
-            return;
-        }
-
-        // 取出第一個元素
-        let prevId = -1;
-        let first = remaining[0];
-        let canPair = false;
-
-        // 嘗試將 first 與其他元素配對
-        for (let i = 1; i < remaining.length; i++) {
-            let second = remaining[i];
-
-            // 判斷是否為有效配對
-            if (isValidPair(first, second)) {
-                let newRemaining = [...remaining.slice(1, i), ...remaining.slice(i + 1)];
-
-                currentPairs.push([first.positionId, second.positionId]); // 配對
-                backtrack(newRemaining, currentPairs); // 回溯
-                currentPairs.pop();
-
-                canPair = true;
-            }
-        }
-
-        // 如果無法配對，將 first 單獨成為一組
-        if (!canPair) {
-            currentPairs.push([first.positionId]);
-            backtrack(remaining.slice(1), currentPairs);
-            currentPairs.pop();
-        }
-    }
-
-    // 開始回溯
-    backtrack(elements, []);
-
-    console.log('回溯次數:', count);
-    console.log('去重前:', allPairings.length);
-
-    // 去重：將每個分組排序，並轉換為唯一標準形式
-    let uniquePairings = Array.from(
-        new Set(
-            allPairings.map(pairing =>
-                JSON.stringify(pairing.map(group => group.sort()).sort())
-            )
-        )
-    ).map(JSON.parse);
-
-    console.log('去重後:', uniquePairings.length);
-    return uniquePairings;
-}
-
-let elements = [
-    {type: "buy_call", positionId: 0},
-    {type: "buy_put", positionId: 1},
-    {type: "buy_put", positionId: 1},
-    {type: "buy_put", positionId: 1},
-    {type: "sell_call", positionId: 2},
-    {type: "sell_put", positionId: 3},
-    {type: "buy_call", positionId: 4},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "sell_put", positionId: 5},
-    {type: "buy_put", positionId: 6},
-    {type: "sell_call", positionId: 7},
-    {type: "buy_call", positionId: 8},
-    {type: "buy_put", positionId: 9},
-    {type: "buy_put", positionId: 10},
-    {type: "buy_put", positionId: 10},
-    {type: "buy_put", positionId: 10},
-    {type: "sell_call", positionId: 11},
-    {type: "buy_put", positionId: 12},
-    {type: "sell_put", positionId: 13},
-    {type: "sell_call", positionId: 14}
-];
-
-
-
-// 執行測試
-console.time('計時名稱');
-let result = getPairings(elements);
-console.log('分組方式:', result);
-console.timeEnd('計時名稱');
-
-*/
