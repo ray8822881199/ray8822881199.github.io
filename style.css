@@ -45,9 +45,15 @@ button:active {
 
 #opknows {
     display: block;
+    line-height: 1.7rem;
 }
-
-
+#opknows>div{
+    background-color: #1e1e1e; /* 深色背景 */
+    padding: 10px 20px;
+    margin: 10px 0px;
+}
+#opknows p{
+}
 
 
 /* 外層容器 */
@@ -136,11 +142,21 @@ button:active {
     pointer-events: none; /* 避免線條干擾操作 */
 }
 
+.privacy-policy {
+    font-size: 11px; /* 縮小字體 */
+    color: #b0b0b0; /* 淺灰色文字 */
+}
 
+.text-block a {
+    color: #b0b0b0; /* 淺灰色超連結 */
+    font-size: 18px; /* 縮小字體 */
+    font-weight: bold; /* 超連結字體加粗 */
+    text-decoration: none; /* 移除超連結底線 */
+}
 
 
 footer {
-    font-size: 12px; /* 縮小字體 */
+    font-size: 11px; /* 縮小字體 */
     text-align: center; /* 水平置中 */
     margin-top: 20px; /* 預留空間讓頁尾有呼吸感 */
     color: #b0b0b0; /* 淺灰色文字 */

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="選擇權持倉損益計算機，視覺化持倉損益情形，並支持保證金試算功能。">
-    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權">
+    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權, 持倉試算">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>選擇權倉位損益計算機</title>
@@ -31,7 +31,6 @@
         </div>
         <div class="container">
             <div id="main_config">
-                <button id="addPosition">新增倉位</button>
                 <button id="comfirmPosition">測試倉套用</button>
                 <span>
                     <label for="market-price">大盤價平</label>
@@ -66,92 +65,99 @@
                 <tbody>
                     <!-- 這裡會動態插入每一筆持倉的資料 -->
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            <button id="addPosition">新增</button>
+                        </td>
+                    </tr> 
+                </tfoot>
             </table>
         </div>
     </div>
     <div id="opknows">
-
-
-選擇權 (Options) 的基本定義
-選擇權是一種金融衍生商品，給予持有者在特定到期日之前或當天以約定價格買入或賣出標的資產的權利，而非義務。
-分為 
-    買權 (Call Option) 
-    賣權 (Put Option)
-
-
-
-
-            <h3>Call</h3>
+        <h1>如何計算選擇權保證金?</h1>
+        <!-- 裸賣選擇權 -->
+        <div class="text-block">
+            <h2>裸賣選擇權</h2>
             <p>
-                Call 是一種期權，賦予持有人在未來某個指定時間內以約定價格購買標的資產的權利，但並無義務。對於台指選擇權來說，Call option 讓投資者有權在未來某個時間以特定價格買入台指期貨。
+                裸賣選擇權的保證金計算是根據期權的市場價格、期權的執行價格與標的資產的波動性來計算的。對於台指選擇權，裸賣期權的保證金額度會受到以下因素影響：
             </p>
-
-            <h3>Put</h3>
-            <p>Put 是一種期權，賦予持有人在未來某個指定時間內以約定價格賣出標的資產的權利，但並無義務。對於台指選擇權來說，Put option 讓投資者有權在未來某個時間以特定價格賣出台指期貨。</p>
-
-            <h3>希臘字母</h3>
-            <p>希臘字母是期權交易中用來衡量期權價格變動的敏感度，常見的有 Delta、Gamma、Theta、Vega 和 Rho 等。這些指標幫助交易者了解選擇權價格如何隨著市場變動而波動：</p>
             <ul>
-                <li><strong>Delta</strong>：衡量標的資產價格變動對期權價格的影響。</li>
-                <li><strong>Gamma</strong>：衡量 Delta 的變化速度。</li>
-                <li><strong>Theta</strong>：衡量期權價值隨時間流逝而減少的速度。</li>
-                <li><strong>Vega</strong>：衡量期權價值對波動率變動的敏感度。</li>
-                <li><strong>Rho</strong>：衡量期權價值對利率變動的敏感度。</li>
+                <li>價外值 ( Out-of-the-Money Value ) ： 標的資產價格與期權執行價格之間的差距。</li>
+                <li>權利金市值 ( Option Premium Market Value ) ： 期權在市場上的交易價格，包括內在價值和時間價值。</li>
+                <li>A值  ( A-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
+                <li>B值  ( B-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
+                <li>C值  ( C-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
             </ul>
-
-            <h3>波動率</h3>
-            <p>波動率是指市場價格的變動程度。在選擇權市場中，波動率越高，期權的價值通常越大。台指選擇權的波動率會受到市場大盤走勢及未來經濟事件影響，通常用於衡量市場的預期波動性。</p>
-
-            <h3>時間價值</h3>
-            <p>時間價值是期權的價格中，除去內在價值部分以外的那部分價值，通常隨著到期日的臨近而減少。時間價值的大小受期權剩餘時間長短影響。對於台指選擇權來說，時間價值在接近到期日時會快速減少，這被稱為“時間衰減”。</p>
-
-            <h3>價內外</h3>
-            <p>價內 (In the money, ITM) 是指選擇權的執行價格對持有者有利，價外 (Out of the money, OTM) 則是執行價格對持有者不利。</p>
+            <p>
+                一般來說，裸賣選擇權的保證金計算公式為：<strong>權利金市值 + Max( A值 - 價外值，B值 )</strong>
+            </p>
+            <p>
+                需要注意的是<br>
+                履約價為價外 500點 ~ 1000點 保證金 A、B 值都會加收 20％<br>
+                履約價超過價外 1000點 保證金 A、B 值都會加收 50％<br>
+                具體的計算方式可能會隨著不同期權的波動性以及市場情況而調整，請以官方公告為準。
+            </p>
+        </div>
+        <!-- 複式單 -->
+        <div class="text-block">
+            <h2>複式單</h2>
             <ul>
-                <li><strong>Call Option</strong>：當執行價格低於市場價格時，為價內；反之為價外。</li>
-                <li><strong>Put Option</strong>：當執行價格高於市場價格時，為價內；反之為價外。</li>
+                <li>買權牛市 (Bull Call Spread) ： 買進較低履約價的買權，同時賣出較高履約價的買權，以限制風險並降低成本。</li>
+                <li>買權熊市 (Bear Call Spread) ： 賣出較低履約價的買權，同時買進較高履約價的買權，用於看不漲市場。</li>
+                <li>賣權牛市 (Bull Put Spread) ： 賣出較高履約價的賣權，同時買進較低履約價的賣權，適用於看不跌市場。</li>
+                <li>賣權熊市 (Bear Put Spread) ： 買進較高履約價的賣權，同時賣出較低履約價的賣權，用於看跌市場並降低成本。</li>
+                <li>買進跨式 (Long Straddle) ： 同時買進相同履約價與到期日的買權和賣權，預期市場將有劇烈波動。</li>
+                <li>買進勒式 (Long Strangle) ： 同時買進不同履約價但相同到期日的買權和賣權，適用於市場大幅波動但成本低於跨式。</li>
+                <li>賣出跨式 (Short Straddle) ： 同時賣出相同履約價與到期日的買權和賣權，適用於市場將保持穩定時賺取權利金。</li>
+                <li>賣出勒式 (Short Strangle) ： 同時賣出不同履約價但相同到期日的買權和賣權，因為賣出的是價外期權，權利金收入較跨式低，但風險也相對分散。</li>
             </ul>
-
-            <h3>IOC</h3>
-            <p>IOC（Immediate Or Cancel）是一種指令類型，要求立即執行部分或全部訂單，未成交的部分會被取消。這種指令通常用於希望快速執行的情況，特別是在市場變動較快時，選擇權交易者常會使用此指令來快速獲得價格。</p>
-
-            <h3>裸賣</h3>
-            <p>裸賣是指賣出選擇權合約，但並未持有相對應的標的資產。這種操作風險較高，因為賣方若未持有標的資產，可能需以市價買入標的資產來履行賣出選擇權的義務，並可能承擔無限損失的風險。</p>
-
-        <h2>甚麼是複式單</h2>
-
-            <h3>功能</h3>
-            <p>複式單是由多筆期權或期貨合約組合而成的交易策略。它可以幫助交易者分散風險，或在不同市場情境下獲得更大的回報。常見的複式單策略包括跨式策略、鷹式策略等，這些策略常被用來應對市場不確定性或大幅波動的情況。</p>
-
-            <h3>種類</h3>
-            <p>常見的複式單種類有：</p>
+            <p>
+                當中只有賣方價差單需要支付保證金，分別是：
+            </p>
             <ul>
-                <li><strong>跨式（Straddle）</strong>：同時買入相同執行價格的 Call 和 Put 期權，適用於預期市場將大幅波動的情況，無論市場上漲或下跌都能獲利。</li>
-                <li><strong>鷹式（Strangle）</strong>：買入兩個不同執行價格的 Call 和 Put 期權，適用於預期市場波動會超過一定範圍的情況，但比跨式策略的成本低。</li>
-                <li><strong>垂直差價（Vertical Spread）</strong>：買入與賣出具有相同到期日但不同執行價格的期權，通常用於控制風險並獲取固定的回報。</li>
+                <li>Bear Call Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
+                <li>Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
+                <li>Short Straddle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
+                <li>Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
             </ul>
+        </div>
 
-        <h2>如何計算選擇權保證金?</h2>
-
-            <h3>裸賣</h3>
-            <p>裸賣選擇權的保證金計算是根據期權的市場價格、期權的執行價格與標的資產的波動性來計算的。對於台指選擇權，裸賣期權的保證金額度會受到以下因素影響：</p>
+        <div class="text-block">
+            <h2>計算機使用之參數</h2>
+            <p>
+                資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br><br>
+                警語：<br>
+                1.期貨交易具有一定風險，交易人應先評估本身資金及所能擔負之風險，過去績效或未來預期的表現不可作為日後績效之保證。<br>
+                2.實際可交易商品相關資訊請以主管機關公告為限。<br>
+            </p>
             <ul>
-                <li>標的資產價格與期權執行價格之間的差距。</li>
-                <li>期權的時間價值。</li>
-                <li>市場的波動性。</li>
+                <li><strong>契約乘數：</strong> <span id="contractMultiplier"></span></li>
             </ul>
-            <p>一般來說，裸賣期權的保證金計算公式為：</p>
-            <p><strong>保證金 = 額外的標的資產價值 + 期權費用</strong></p>
-            <p>具體的計算方式可能會隨著不同期權的波動性以及市場情況而調整。</p>
-
-            <h3>複式單</h3>
-            <p>複式單的保證金計算方式會根據交易者所選擇的策略而有所不同。一般來說，跨式或鷹式策略的保證金較裸賣期權低，因為交易者同時持有相對應的買入和賣出期權，這樣可以減少風險。</p>
-            <p>計算複式單的保證金，通常是根據以下公式來計算：</p>
-            <p><strong>保證金 = 最大風險 + 期權成本</strong></p>
-            <p>其中，最大風險是指策略中最有可能損失的金額，而期權成本則是持有期權所需支付的費用。</p>
-
-
+            <ul>
+                <li><strong>原始保證金 - 小台指期保證金：</strong> <span id="od-miniMargin"></span></li>
+                <li><strong>原始保證金 - A值：</strong> <span id="od-AValue"></span></li>
+                <li><strong>原始保證金 - B值：</strong> <span id="od-BValue"></span></li>
+                <li><strong>原始保證金 - C值：</strong> <span id="od-CValue"></span></li>
+            </ul>
+            <ul>
+                <li><strong>維持保證金 - 小台指期保證金：</strong> <span id="mm-miniMargin"></span></li>
+                <li><strong>維持保證金 - A值：</strong> <span id="mm-AValue"></span></li>
+                <li><strong>維持保證金 - B值：</strong> <span id="mm-BValue"></span></li>
+                <li><strong>維持保證金 - C值：</strong> <span id="mm-CValue"></span></li>
+            </ul>
+        </div>
+        <div class="privacy-policy">
+            我們的網站會收集以下類型的資料：用戶的瀏覽器資訊、IP 地址、網站流量數據，使用 Google Analytics 分析網站訪問。<br>
+            我們收集資料的目的是為了改善網站的內容、提高用戶體驗、進行市場分析及為用戶展示廣告。<br>
+            我們的網站使用 Google AdSense 廣告系統。Google 會使用 Cookie 和網頁信標來顯示適合您興趣的廣告，這些資料也會根據 Google 的隱私政策進行處理。<br>
+            我們也使用 Google Analytics 來分析網站的流量，這樣我們可以了解哪些頁面最受歡迎，並改善我們的網站。<br>
+            我們的網站使用 Cookie 來改善用戶體驗，您可以在您的瀏覽器設置中選擇禁用 Cookie。<br>
+            我們將採取一切合理的措施來保護您的個人資料，但無法保證資料的完全安全，尤其是在互聯網上傳輸過程中。
+        </div>
     </div>
+
     <footer>
         <p>Copyright © 2024 Ray. All Rights Reserved.</p>
         <p>
@@ -160,6 +166,17 @@
         </p>
         <p>如有任何需要，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
     </footer>
+
+    <div class="adsense">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6002813508124164"
+             data-ad-slot="YOUR_AD_SLOT"
+             data-ad-format="auto"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
     <!-- 引用 JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>

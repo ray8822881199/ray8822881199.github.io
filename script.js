@@ -4,8 +4,10 @@
  * 本網站上所有內容，包括文字、圖形、標誌、設計以及源代碼，均受到適用的著作權法律保護。  未經授權，嚴禁用於商業或非法用途的複製、分發或修改。  
  */
 
+window.dataDate = new Date('2024-11-11'); // 資料更新日期
+
 window.underlyingPrice=22500; // 價平
-window.analysisWidth = 6; // 價位寬度 = 價平漲跌幅*100
+window.analysisWidth = 6; // 價位寬度(%)
 window.part = 100; // 切成幾分
 
 window.contractMultiplier=50; // 每點價值
@@ -27,9 +29,23 @@ window.marginInfo={
     }
 };
 
+
+// 使用 jQuery 設定 HTML 元素的內容
+$("#dataGetDate").text(window.dataDate.toISOString().split('T')[0]);
+$("#contractMultiplier").text(window.contractMultiplier);
+$("#od-miniMargin").text(window.marginInfo.od.miniMargin);
+$("#od-AValue").text(window.marginInfo.od.AValue);
+$("#od-BValue").text(window.marginInfo.od.BValue);
+$("#od-CValue").text(window.marginInfo.od.CValue);
+$("#mm-miniMargin").text(window.marginInfo.mm.miniMargin);
+$("#mm-AValue").text(window.marginInfo.mm.AValue);
+$("#mm-BValue").text(window.marginInfo.mm.BValue);
+$("#mm-CValue").text(window.marginInfo.mm.CValue);
+
 window.items=20; // 價平上下檔數
 window.positions = []; // 存放所有持倉數據
 
+// 更新畫面資訊
 
 $(document).ready(function () {
 
@@ -89,15 +105,15 @@ $(document).ready(function () {
     // 建倉表事件 拖拉
     $(document).off('mousemove').on('mousemove', function (e) {
         if (isBuilding) {
-            const nowCell = $(document.elementFromPoint(startCell.offset().left - window.scrollX, e.pageY - window.scrollY))
+            const nowCell = $(document.elementFromPoint(startCell.offset().left - window.scrollX, e.pageY - window.scrollY));
             const offset = startCell.offset();
             const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call')?0.25:0.75)-(startCell.hasClass('call')?linewidth:0);
             const startY = offset.top + startCell.outerHeight() * 0.5;
             const endX = e.pageX;
             const endY = e.pageY;
 
-            if (nowCell.hasClass('call')) {nowCell.css('background-color', '#7e0104')};
-            if (nowCell.hasClass('put')) {nowCell.css('background-color', '#045b1c')};
+            if (nowCell.hasClass('call')) {nowCell.css('background-color', '#7e0104');}
+            if (nowCell.hasClass('put')) {nowCell.css('background-color', '#045b1c');}
 
             tradeLine.css({
                 'width': linewidth,
@@ -337,6 +353,15 @@ $(document).ready(function () {
         if (positionIds.length === 1) {
             // 檢查倉位
             const position = pos[0];
+            if (position.type == null) {
+                return {
+                    p1: positionIds[0],
+                    p2: null,
+                    margin: 0,
+                    premiumReceived: 0,
+                    premiumPaid: 0
+                };
+            }
             const [positionType, optionType] = position.type.split('_');
             const isSell = positionType === 'sell';
             const isBuy = positionType === 'buy';
@@ -454,13 +479,14 @@ $(document).ready(function () {
         // 測試加持倉的保證金
         for (let i = 0; i <= part; i++) {
             let closingPrice = priceRange.min + (priceRange.max - priceRange.min) / part * i;
-            groupPositions.forEach((ps, index) => {
+            for (let index = 0; index < groupPositions.length; index++) {
+                let ps = groupPositions[index];
                 // 計算每個 position 組合的保證金和權利金
                 const od_marginData = calculateComboMarginAndPremium(ps, closingPrice, true);
                 const mm_marginData = calculateComboMarginAndPremium(ps, closingPrice, false);
                 od_totalMargin[i] += od_marginData.margin;
                 mm_totalMargin[i] += mm_marginData.margin;
-            });
+            }
         }
 
         // 遍歷每個倉位
@@ -567,6 +593,8 @@ $(document).ready(function () {
                 position: 'cyan',       // 持倉線顏色
                 applied: 'orange',      // 套用後線顏色
                 test: 'red',            // 測試倉線顏色
+                od: 'orange',           // 原始保證金線顏色
+                mm: 'red',              // 維持保證金線顏色
             },
             tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
             tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色
@@ -593,7 +621,8 @@ $(document).ready(function () {
                     fontWeight: 'bold' // 粗體
                 },
                 formatter: function (params) {
-                    if (positions.length === 0) {
+
+                    if (!positions.find((p) => p.type !== null)) {
                         return null; // 不顯示 tooltip
                     }
                     // 取得點位
@@ -602,14 +631,26 @@ $(document).ready(function () {
                     params.forEach(item => {
                         let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
                         if (item.seriesIndex<3) {
-                            tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示每條線的數據
+                            //tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示每條線的數據
+                            tooltipContent += `
+                                <div style="display: flex; justify-content: space-between; width: 200px;">
+                                    <span style="text-align: left;">${item.marker}${item.seriesName}</span>
+                                    <span style="text-align: right;">${value.toFixed(2)}</span>
+                                </div>
+                            `;
                         }
                     });
                     tooltipContent += `<br>保證金：<br>`;
                     params.forEach(item => {
                         let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
                         if (item.seriesIndex>=3) {
-                            tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示保證金的數據
+                            //tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示保證金的數據
+                            tooltipContent += `
+                                <div style="display: flex; justify-content: space-between; width: 200px;">
+                                    <span style="text-align: left;">${item.marker}${item.seriesName}</span>
+                                    <span style="text-align: right;">${value.toFixed(2)}</span>
+                                </div>
+                            `;
                         }
                     });
                     // 返回格式化的 tooltip 內容
@@ -626,6 +667,12 @@ $(document).ready(function () {
                     height: '20%' // 下方圖表高度
                 }
             ],
+            legend: {
+                show: true, // 開啟圖例
+                textStyle: {
+                    color: nightModeColors.legendTextColor, // 圖例文字顏色
+                }
+            },
             xAxis: [
                 {
 
@@ -766,9 +813,9 @@ $(document).ready(function () {
                     emphasis: {
                         focus: 'series',
                     },
-                    color: nightModeColors.seriesColors.test,
+                    color: nightModeColors.seriesColors.od,
                     lineStyle: {
-                        width: 1
+                        width: 2
                     }
                 },
                 {
@@ -781,9 +828,9 @@ $(document).ready(function () {
                     emphasis: {
                         focus: 'series',
                     },
-                    color: nightModeColors.seriesColors.test,
+                    color: nightModeColors.seriesColors.mm,
                     lineStyle: {
-                        width: 1
+                        width: 2
                     }
                 }
             ]
