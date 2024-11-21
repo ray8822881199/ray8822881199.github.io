@@ -433,6 +433,7 @@ $(document).ready(function () {
 
     // 更新圖表
     function updateChart() {
+
         const totalData = [];
         const totalTestData = [];
         const onlyTestData = [];
@@ -566,7 +567,9 @@ $(document).ready(function () {
                 position: 'cyan',       // 持倉線顏色
                 applied: 'orange',      // 套用後線顏色
                 test: 'red',            // 測試倉線顏色
-            }
+            },
+            tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
+            tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色
         };
 
         // 更新圖表
@@ -574,128 +577,218 @@ $(document).ready(function () {
             backgroundColor: nightModeColors.backgroundColor, // 背景顏色
             title: {
                 textStyle: {
-                    color: nightModeColors.titleTextColor, // 標題文字顏色
+                    color: nightModeColors.titleTextColor // 標題文字顏色
                 }
+            },
+            axisPointer: {
+                type: 'cross', // 交叉指示器
+                label: { backgroundColor: '#6a7985' },
+                link: { xAxisIndex: 'all' },
             },
             tooltip: {
-                trigger: 'axis',
-                formatter: function (params) {
-                    let tooltip = `${params[0].axisValue}<br>`;
-                    params.forEach(item => {
-                        tooltip += `${item.seriesName}: ${item.data[1].toFixed(2)}<br>`;
-                    });
-                    return positions.length && tooltip;
-                },
-            },
-            legend: {
-                show: true, // 開啟圖例
+                trigger: 'axis', // 軸觸發
+                backgroundColor: nightModeColors.tooltipBackgroundColor, // 背景顏色 (透明度 70%)
                 textStyle: {
-                    color: nightModeColors.legendTextColor, // 圖例文字顏色
+                    color: nightModeColors.tooltipTextColor, // 文字顏色
+                    fontWeight: 'bold' // 粗體
+                },
+                formatter: function (params) {
+                    if (positions.length === 0) {
+                        return null; // 不顯示 tooltip
+                    }
+                    // 取得點位
+                    let tooltipContent = `點位：${params[0].axisValue}<br>`;
+                    // 遍歷每一條線
+                    params.forEach(item => {
+                        let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
+                        if (item.seriesIndex<3) {
+                            tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示每條線的數據
+                        }
+                    });
+                    tooltipContent += `<br>保證金：<br>`;
+                    params.forEach(item => {
+                        let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
+                        if (item.seriesIndex>=3) {
+                            tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示保證金的數據
+                        }
+                    });
+                    // 返回格式化的 tooltip 內容
+                    return tooltipContent;
                 }
             },
-            xAxis: {
-                type: 'value',
-                name: '最終收盤價格',
-                nameTextStyle: {
-                    color: nightModeColors.textColor // X軸名稱顏色
+            grid: [
+                {
+                    top: '14%', // 上方圖表位置
+                    height: '50%' // 上方圖表高度
                 },
-                axisLine: {
-                    lineStyle: {
-                        color: nightModeColors.axisLineColor // X軸線顏色
+                {
+                    top: '72%', // 下方圖表位置
+                    height: '20%' // 下方圖表高度
+                }
+            ],
+            xAxis: [
+                {
+
+                    gridIndex: 0, 
+                    type: 'value',
+                    name: '最終收盤價格',
+                    nameTextStyle: {
+                        color: nightModeColors.textColor // X 軸名稱顏色
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: nightModeColors.axisLineColor // X 軸線顏色
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: nightModeColors.gridColor // 網格線顏色
+                        }
+                    },
+                    min: priceRange.min,
+                    max: priceRange.max,
+                },
+                {
+                    gridIndex: 1, 
+                    type: 'value',
+                    name: '保證金',
+                    nameTextStyle: {
+                        color: nightModeColors.textColor // X 軸名稱顏色
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: nightModeColors.axisLineColor // X 軸線顏色
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: nightModeColors.gridColor // 網格線顏色
+                        }
+                    },
+                    min: priceRange.min,
+                    max: priceRange.max,
+                }
+            ],
+            yAxis: [
+                {
+                    gridIndex: 0, // 上方圖表 Y 軸
+                    type: 'value',
+                    name: '損益',
+                    nameTextStyle: {
+                        color: nightModeColors.textColor // Y 軸名稱顏色
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: nightModeColors.axisLineColor // Y 軸線顏色
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: nightModeColors.gridColor // 網格線顏色
+                        }
                     }
                 },
-                splitLine: {
+                {
+                    gridIndex: 1, // 下方圖表 Y 軸
+                    type: 'value',
+                    nameTextStyle: {
+                        color: nightModeColors.textColor // Y 軸名稱顏色
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: nightModeColors.axisLineColor // Y 軸線顏色
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: nightModeColors.gridColor // 網格線顏色
+                        }
+                    },
+                }
+            ],
+            series: [
+                // 上方圖表數據
+                {
+                    name: '持倉',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    data: totalData,
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.position,
                     lineStyle: {
-                        color: nightModeColors.gridColor // 網格線顏色
+                        width: 2
                     }
                 },
-                min: priceRange.min,
-                max: priceRange.max,
-            },
-            yAxis: {
-                type: 'value',
-                name: '損益',
-                nameTextStyle: {
-                    color: nightModeColors.textColor // Y軸名稱顏色
-                },
-                axisLine: {
+                {
+                    name: '測試倉套用',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    data: totalTestData,
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.applied,
                     lineStyle: {
-                        color: nightModeColors.axisLineColor // Y軸線顏色
+                        type: 'dashed',
+                        width: 2
                     }
                 },
-                splitLine: {
+                {
+                    name: '測試倉',
+                    type: 'line',
+                    xAxisIndex: 0,
+                    yAxisIndex: 0,
+                    data: onlyTestData,
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.test,
                     lineStyle: {
-                        color: nightModeColors.gridColor // 網格線顏色
+                        type: 'dashed',
+                        width: 2
                     }
                 },
-            },
-            series: [{
-                name: '持倉',
-                type: 'line',
-                data: totalData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
+                // 下方圖表數據
+                {
+                    name: '原始保證金',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: od_marginData,
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.test,
+                    lineStyle: {
+                        width: 1
+                    }
                 },
-                color: nightModeColors.seriesColors.position, // 設定線顏色
-                lineStyle: {
-                    type: 'solid', // 設定實線
-                    width: 2       // 設定線寬，視需要可調整
+                {
+                    name: '維持保證金',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: mm_marginData,
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.test,
+                    lineStyle: {
+                        width: 1
+                    }
                 }
-            }, {
-                name: '套用後',
-                type: 'line',
-                data: totalTestData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
-                },
-                color: nightModeColors.seriesColors.applied, // 設定線顏色
-                lineStyle: {
-                    type: 'dashed', // 設定虛線
-                    width: 2       // 設定線寬，視需要可調整
-                }
-            }, {
-                name: '測試倉',
-                type: 'line',
-                data: onlyTestData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
-                },
-                color: nightModeColors.seriesColors.test, // 設定線顏色
-                lineStyle: {
-                    type: 'dashed', // 設定虛線
-                    width: 2       // 設定線寬，視需要可調整
-                }
-            }, {
-                name: '原始保證金',
-                type: 'line',
-                data: od_marginData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
-                },
-                color: nightModeColors.seriesColors.test, // 設定線顏色
-                lineStyle: {
-                    type: 'solid', // 設定虛線
-                    width: 1       // 設定線寬，視需要可調整
-                }
-            }, {
-                name: '維持保證金',
-                type: 'line',
-                data: mm_marginData,
-                symbol: 'none',
-                emphasis: {
-                    focus: 'series',
-                },
-                color: nightModeColors.seriesColors.test, // 設定線顏色
-                lineStyle: {
-                    type: 'solid', // 設定虛線
-                    width: 1       // 設定線寬，視需要可調整
-                }
-            }],
+            ]
         });
+
     }
 
 });
