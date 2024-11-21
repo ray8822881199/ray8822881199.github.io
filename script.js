@@ -189,6 +189,7 @@ $(document).ready(function () {
 
         totalPositions.forEach(position => {
             const { groupId, positionId } = position;
+            if(position.isclosed||!position.isactive) return; // 不處理已平倉或不計算的保證金
             if (groupId) {
                 // 如果有 groupId，將 positionId 加入相應的 groupId 陣列
                 if (!grouped[groupId]) {
@@ -464,6 +465,7 @@ $(document).ready(function () {
         const onlyTestData = [];
         const od_marginData = [];
         const mm_marginData = [];
+        const profitRateData = [];
 
         const profitPrice = new Array(part).fill(0); // 價位陣列
         const totalProfit = new Array(part).fill(0); // 持倉單總損益陣列
@@ -472,6 +474,8 @@ $(document).ready(function () {
 
         const od_totalMargin = new Array(part).fill(0); // 保證金陣列
         const mm_totalMargin = new Array(part).fill(0); // 保證金陣列
+
+        const profitRate = new Array(part).fill(0); // 獲利率陣列
 
         //更新分組資料
         const groupPositions = groupPositionsByGroupId(positions);
@@ -490,6 +494,7 @@ $(document).ready(function () {
         }
 
         // 遍歷每個倉位
+        let testPositionsCount = 0; // 計算測試倉個數
         positions.forEach((pos, index) => {
             // 檢查倉位數據是否完整
             if (
@@ -560,6 +565,7 @@ $(document).ready(function () {
                 if(pos.istest){
                     // 僅測試
                     onlyTestProfit[i] += profit;
+                    testPositionsCount++;
                 }else{
                     // 僅持倉
                     totalProfit[i] += profit;
@@ -572,14 +578,26 @@ $(document).ready(function () {
 
         });
 
+
+
         // 組合總損益數據
-        for (let i = 0; i < totalProfit.length; i++) {
-            totalData.push([profitPrice[i], totalProfit[i]*contractMultiplier]);
-            totalTestData.push([profitPrice[i], testTotalProfit[i]*contractMultiplier]);
-            onlyTestData.push([profitPrice[i], onlyTestProfit[i]*contractMultiplier]);
-            od_marginData.push([profitPrice[i], od_totalMargin[i]]);
-            mm_marginData.push([profitPrice[i], mm_totalMargin[i]]);
-        }
+        profitPrice.forEach((price, i) => {
+
+            // 組合損益數據
+            totalData.push([price, totalProfit[i] * contractMultiplier]);
+            if (testPositionsCount > 0) {
+                totalTestData.push([price, testTotalProfit[i] * contractMultiplier]);
+                onlyTestData.push([price, onlyTestProfit[i] * contractMultiplier]);
+            }
+
+            // 組合保證金數據
+            od_marginData.push([price, od_totalMargin[i]]);
+            mm_marginData.push([price, mm_totalMargin[i]]);
+
+            // 保證金獲利率
+            profitRateData.push([price, testTotalProfit[i] * contractMultiplier / od_totalMargin[i]]);
+            
+        });
 
         // 夜間模式配色配置
         const nightModeColors = {
@@ -593,7 +611,7 @@ $(document).ready(function () {
                 position: 'cyan',       // 持倉線顏色
                 applied: 'orange',      // 套用後線顏色
                 test: 'red',            // 測試倉線顏色
-                od: 'orange',           // 原始保證金線顏色
+                od: '#B766AD',           // 原始保證金線顏色
                 mm: 'red',              // 維持保證金線顏色
             },
             tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
@@ -621,39 +639,39 @@ $(document).ready(function () {
                     fontWeight: 'bold' // 粗體
                 },
                 formatter: function (params) {
-
-                    if (!positions.find((p) => p.type !== null)) {
+                    // 當只有未選 type 的倉在清單中時會顯示一長串的 tooltip
+                    if (!positions.find((p) => p.type !== null && p.isactive)) {
                         return null; // 不顯示 tooltip
                     }
+
                     // 取得點位
                     let tooltipContent = `點位：${params[0].axisValue}<br>`;
+                    let positionContent = ""; // 用於存放持倉內容
+                    let marginContent = "";   // 用於存放保證金內容
                     // 遍歷每一條線
                     params.forEach(item => {
                         let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
-                        if (item.seriesIndex<3) {
-                            //tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示每條線的數據
-                            tooltipContent += `
-                                <div style="display: flex; justify-content: space-between; width: 200px;">
-                                    <span style="text-align: left;">${item.marker}${item.seriesName}</span>
-                                    <span style="text-align: right;">${value.toFixed(2)}</span>
-                                </div>
-                            `;
-                        }
-                    });
-                    tooltipContent += `<br>保證金：<br>`;
-                    params.forEach(item => {
-                        let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
-                        if (item.seriesIndex>=3) {
-                            //tooltipContent += `${item.marker}${item.seriesName}: ${value.toFixed(2)}<br>`; // 顯示保證金的數據
-                            tooltipContent += `
-                                <div style="display: flex; justify-content: space-between; width: 200px;">
-                                    <span style="text-align: left;">${item.marker}${item.seriesName}</span>
-                                    <span style="text-align: right;">${value.toFixed(2)}</span>
-                                </div>
-                            `;
+                        let content = `
+                            <div style="display: flex; justify-content: space-between; width: 200px;">
+                                <span style="text-align: left;">${item.marker}${item.seriesName}</span>
+                                <span style="text-align: right;">${value.toFixed(2)}</span>
+                            </div>
+                        `;
+                        if (['持倉','測試倉套用','測試倉'].includes(item.seriesName)) {
+                            positionContent += content;
+                        } else if (['原始保證金','維持保證金'].includes(item.seriesName)) {
+                            marginContent += content;
+                        } else if (['保證金獲利率'].includes(item.seriesName)) {
+                            marginContent += `
+                            <div style="display: flex; justify-content: space-between; width: 200px;">
+                                <span style="text-align: left;">${item.marker}${item.seriesName}</span>
+                                <span style="text-align: right;">${(value*100).toFixed(2)}%</span>
+                            </div>
+                        `;
                         }
                     });
                     // 返回格式化的 tooltip 內容
+                    tooltipContent += positionContent + `<br>保證金：<br>` + marginContent;
                     return tooltipContent;
                 }
             },
@@ -698,7 +716,6 @@ $(document).ready(function () {
                 {
                     gridIndex: 1, 
                     type: 'value',
-                    name: '保證金',
                     nameTextStyle: {
                         color: nightModeColors.textColor // X 軸名稱顏色
                     },
@@ -712,6 +729,7 @@ $(document).ready(function () {
                             color: nightModeColors.gridColor // 網格線顏色
                         }
                     },
+                    
                     min: priceRange.min,
                     max: priceRange.max,
                 }
@@ -751,6 +769,17 @@ $(document).ready(function () {
                             color: nightModeColors.gridColor // 網格線顏色
                         }
                     },
+                    min: 'dataMin',
+                    splitNumber: 3,
+                },
+                {
+                    gridIndex: 1, 
+                    type: 'value',
+                    axisLine: {show: false},
+                    splitLine: {show: false},
+                    show: false,
+                    min: 'dataMin',
+                    splitNumber: 3,
                 }
             ],
             series: [
@@ -830,6 +859,23 @@ $(document).ready(function () {
                     },
                     color: nightModeColors.seriesColors.mm,
                     lineStyle: {
+                        width: 2
+                    }
+                },
+                {
+                    name: '保證金獲利率',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    yAxisIndex: 2,
+                    data: profitRateData,
+                    position: 'end',
+                    symbol: 'none',
+                    emphasis: {
+                        focus: 'series',
+                    },
+                    color: nightModeColors.seriesColors.applied,
+                    lineStyle: {
+                        type: 'dashed',
                         width: 2
                     }
                 }
