@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="選擇權持倉損益計算機，視覺化持倉損益情形，並支持保證金試算功能。">
-    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權, 持倉試算">
+    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權, 持倉試算, 選擇權計算機, 選擇權持倉試算">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6002813508124164">
 
@@ -122,23 +122,111 @@
         <div class="text-block">
             <h2>複式單</h2>
             <ul>
-                <li>買權牛市 (Bull Call Spread) ： 買進較低履約價的買權，同時賣出較高履約價的買權，以限制風險並降低成本。</li>
-                <li>買權熊市 (Bear Call Spread) ： 賣出較低履約價的買權，同時買進較高履約價的買權，用於看不漲市場。</li>
-                <li>賣權牛市 (Bull Put Spread) ： 賣出較高履約價的賣權，同時買進較低履約價的賣權，適用於看不跌市場。</li>
-                <li>賣權熊市 (Bear Put Spread) ： 買進較高履約價的賣權，同時賣出較低履約價的賣權，用於看跌市場並降低成本。</li>
-                <li>買進跨式 (Long Straddle) ： 同時買進相同履約價與到期日的買權和賣權，預期市場將有劇烈波動。</li>
-                <li>買進勒式 (Long Strangle) ： 同時買進不同履約價但相同到期日的買權和賣權，適用於市場大幅波動但成本低於跨式。</li>
-                <li>賣出跨式 (Short Straddle) ： 同時賣出相同履約價與到期日的買權和賣權，適用於市場將保持穩定時賺取權利金。</li>
-                <li>賣出勒式 (Short Strangle) ： 同時賣出不同履約價但相同到期日的買權和賣權，因為賣出的是價外期權，權利金收入較跨式低，但風險也相對分散。</li>
+                <li>買權牛市 (Bull Call Spread) ： 
+                    <p>
+                        買進較低履約價的 Call，同時賣出較高履約價的 Call，用以降低成本。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤在結算時會比 23000 高，但又不會超過 23100 時<br>
+                        <strong>買進履約價 23000 的 Call + 賣出履約價 23100 Call</strong><br>
+                        就能形成價差 100 點的 Bull Call Spread 組合單，而這個組合單在大盤結算點數超過 23100 時達到最大獲利，<br>
+                        最大損失發生在大盤結算在 23000 以下。<br>
+                        這個類組合單也叫做<strong>溫漲</strong>。
+                    </p>
+                </li>
+                <li>買權熊市 (Bear Call Spread) ：
+                    <p>
+                        賣出較低履約價的 Call ，同時買進較高履約價的 Call，用以限制風險。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤在結算時會比 23000 低，但又不至於大跌時<br>
+                        <strong>賣出履約價 23000 Call + 買進 23100 Call</strong><br>
+                        就能形成價差 100 點的 Bear Call Spread 組合單，而這個組合單在大盤結算點數低於 23000 時達到最大獲利。<br>
+                        最大損失發生在大盤結算在 23100 以上。<br>
+                        這個類組合單也叫做<strong>溫跌做莊</strong>。
+                    </p>
+                </li>
+                <li>賣權牛市 (Bull Put Spread) ：
+                    <p>
+                        賣出較高履約價的賣權，同時買進較低履約價的賣權，適用於看不跌市場。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤會維持在 23000 以上時<br>
+                        <strong>賣出履約價 23000 的 Put + 買進履約價 22900 的 Put</strong><br>
+                        這樣的組合單最大獲利會在大盤結算點數高於 23000 時達成，並且會收取權利金。<br>
+                        最大損失發生在大盤結算在 22900 以下。
+                        這個類組合單也叫做<strong>溫漲做莊</strong>。
+                    </p>
+                </li>
+                <li>賣權熊市 (Bear Put Spread) ：
+                    <p>
+                        買進較高履約價的賣權，同時賣出較低履約價的賣權，用於看跌市場並降低成本。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤會下跌至 22500 左右<br>
+                        <strong>買進履約價 23000 的 Put + 賣出履約價 22500 的 Put</strong><br>
+                        這個組合單會在大盤結算點數低於 22500 時獲得最大獲利。<br>
+                        最大損失則會在大盤結算點數高於 23000 時發生。
+                        這個類組合單也叫做<strong>溫跌</strong>。
+                    </p>
+                </li>
+                <li>買進跨式 (Long Straddle) ：
+                    <p>
+                        同時買進相同履約價與到期日的買權和賣權，預期市場將有劇烈波動。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤將會有大幅波動，但不確定是向上還是向下。<br>
+                        <strong>買進履約價 23000 的 Call + 買進履約價 23000 的 Put 一共花費 500 點權利金</strong><br>
+                        這樣的策略能夠在大盤結算時產生大幅波動時賺取獲利。<br>
+                        如果大盤結算點數遠離 23000 超過 500 點時，將會開始獲利。<br>
+                        具體操作方式常會搭配相同結算日的台指期貨進行鎖定獲利。
+                    </p>
+                </li>
+                <li>買進勒式 (Long Strangle) ：
+                    <p>
+                        同時買進不同履約價但相同到期日的買權和賣權，也適用於市場大幅波動，但成本低於跨式。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤會有大幅波動，並預計波動範圍會超過 22800 到 23200 之間。<br>
+                        <strong>買進履約價 22800 的 Put + 買進履約價 23200 的 Call 一共花費 300 點權利金</strong><br>
+                        這樣的組合能夠在大盤結算點數超過 23500 或跌破 22500 時賺取獲利，成本低於跨式。<br>
+                        需要注意的是賺取的點數是否能和支付出去的權利金打平<br> 
+                        並且 Long Strangle 比 Long Straddle 要求更大的波動
+                    </p>
+                </li>
+                <li>賣出跨式 (Short Straddle) ：
+                    <p>
+                        同時賣出相同履約價與到期日的買權和賣權，適用於市場將保持穩定時賺取權利金。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤將保持穩定，波動不大。<br>
+                        <strong>賣出履約價 23000 的 Call + 賣出履約價 23000 的 Put</strong><br>
+                        這樣的策略能夠在大盤結算在 23000 附近時賺取權利金，若市場波動過大則可能損失。
+                    </p>
+                </li>
+                <li>賣出勒式 (Short Strangle) ：
+                    <p>
+                        同時賣出不同履約價但相同到期日的買權和賣權，因為賣出的是價外期權，權利金收入較跨式低，但風險也相對分散。<br>
+                    </p>    
+                    *舉例 :<br>
+                    <p>
+                        假設我認為大盤會保持穩定，預期不會超過 22800 或跌破 23200。<br>
+                        <strong>賣出履約價 22800 的 Put + 賣出履約價 23200 的 Call</strong><br>
+                        這樣的策略能夠賺取相對較低的權利金，並且風險也相對分散。
+                    </p>
+                </li>
             </ul>
-            <p>
-                當中只有賣方價差單需要支付保證金，分別是：
-            </p>
+            <h3>只有賣方複式單需要支付保證金，分別是：</h3>
             <ul>
-                <li>Bear Call Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
-                <li>Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
-                <li>Short Straddle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
-                <li>Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
+                <li>Bear Call Spread , Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
+                <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
             </ul>
         </div>
 
@@ -148,19 +236,19 @@
                 資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br>
             </p>
             <ul>
-                <li><strong>契約乘數：</strong> <span id="contractMultiplier"></span></li>
+                <li>契約乘數：<strong><span id="contractMultiplier"></span></strong></li>
             </ul>
             <ul>
-                <li><strong>原始保證金 - 小台指期保證金：</strong> <span id="od-miniMargin"></span></li>
-                <li><strong>原始保證金 - A值：</strong> <span id="od-AValue"></span></li>
-                <li><strong>原始保證金 - B值：</strong> <span id="od-BValue"></span></li>
-                <li><strong>原始保證金 - C值：</strong> <span id="od-CValue"></span></li>
+                <li>原始保證金 - 小台指期保證金：<strong><span id="od-miniMargin"></span></strong></li>
+                <li>原始保證金 - A值：<strong><span id="od-AValue"></span></strong></li>
+                <li>原始保證金 - B值：<strong><span id="od-BValue"></span></strong></li>
+                <li>原始保證金 - C值：<strong><span id="od-CValue"></span></strong></li>
             </ul>
             <ul>
-                <li><strong>維持保證金 - 小台指期保證金：</strong> <span id="mm-miniMargin"></span></li>
-                <li><strong>維持保證金 - A值：</strong> <span id="mm-AValue"></span></li>
-                <li><strong>維持保證金 - B值：</strong> <span id="mm-BValue"></span></li>
-                <li><strong>維持保證金 - C值：</strong> <span id="mm-CValue"></span></li>
+                <li>維持保證金 - 小台指期保證金：<strong><span id="mm-miniMargin"></span></strong></li>
+                <li>維持保證金 - A值：<strong><span id="mm-AValue"></span></strong></li>
+                <li>維持保證金 - B值：<strong><span id="mm-BValue"></span></strong></li>
+                <li>維持保證金 - C值：<strong><span id="mm-CValue"></span></strong></li>
             </ul>
         </div>
         <div class="adsense">

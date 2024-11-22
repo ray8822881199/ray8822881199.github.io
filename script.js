@@ -722,14 +722,22 @@ $(document).ready(function () {
                     axisLine: {
                         lineStyle: {
                             color: nightModeColors.axisLineColor // X 軸線顏色
-                        }
+                        },
+                        show: false,
                     },
+                    axisTick:{show: false},
                     splitLine: {
                         lineStyle: {
                             color: nightModeColors.gridColor // 網格線顏色
                         }
                     },
-                    
+                    min: priceRange.min,
+                    max: priceRange.max,
+                },
+                {
+                    gridIndex: 1, 
+                    type: 'value',
+                    show: false,
                     min: priceRange.min,
                     max: priceRange.max,
                 }
@@ -775,13 +783,24 @@ $(document).ready(function () {
                 {
                     gridIndex: 1, 
                     type: 'value',
-                    axisLine: {show: false},
-                    splitLine: {show: false},
                     show: false,
                     min: 'dataMin',
-                    splitNumber: 3,
                 }
             ],
+            visualMap: {
+                seriesIndex:5,
+                show: false,
+                pieces: [
+                    {
+                        gt: -1000,
+                        lte: 0,
+                        color: '#0f0'
+                    }
+                ],
+                outOfRange: {
+                    color: '#f00'
+                }
+            },
             series: [
                 // 上方圖表數據
                 {
@@ -865,10 +884,9 @@ $(document).ready(function () {
                 {
                     name: '保證金獲利率',
                     type: 'line',
-                    xAxisIndex: 1,
+                    xAxisIndex: 2,
                     yAxisIndex: 2,
                     data: profitRateData,
-                    position: 'end',
                     symbol: 'none',
                     emphasis: {
                         focus: 'series',
