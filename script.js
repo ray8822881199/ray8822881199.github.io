@@ -4,14 +4,27 @@
  * 本網站上所有內容，包括文字、圖形、標誌、設計以及源代碼，均受到適用的著作權法律保護。  未經授權，嚴禁用於商業或非法用途的複製、分發或修改。  
  */
 
-window.dataDate = new Date('2024-11-11'); // 資料更新日期
 
-window.underlyingPrice=22500; // 價平
 window.analysisWidth = 6; // 價位寬度(%)
 window.part = 100; // 切成幾分
 
+window.items=20; // 價平上下檔數
+window.positions = []; // 存放所有持倉數據
+
 window.contractMultiplier=50; // 每點價值
 
+window.dataDate = new Date('2024-11-11'); // 資料更新日期
+window.underlyingPrice = 23000; // 價平
+window.isdrawtest = true; // 繪制測試倉
+window.iscalctest = true; // 計算測試倉
+
+window.opFee = 25; // 選擇權手續
+window.miniFee = 25; // 期貨手續
+window.totalFee = 0; // 當前手續
+
+window.opTaxRate = 0.001; // 期交稅率(選擇權)
+window.miniTaxRate = 0.00002; // 期交稅率(期貨)
+window.tax = 0; // 總期交稅
 window.marginInfo={
     // 原始保證金
     od:{
@@ -30,7 +43,7 @@ window.marginInfo={
 };
 
 
-// 使用 jQuery 設定 HTML 元素的內容
+// 設定 HTML 元素的內容
 $("#dataGetDate").text(window.dataDate.toISOString().split('T')[0]);
 $("#contractMultiplier").text(window.contractMultiplier);
 $("#od-miniMargin").text(window.marginInfo.od.miniMargin);
@@ -42,15 +55,26 @@ $("#mm-AValue").text(window.marginInfo.mm.AValue);
 $("#mm-BValue").text(window.marginInfo.mm.BValue);
 $("#mm-CValue").text(window.marginInfo.mm.CValue);
 
-window.items=20; // 價平上下檔數
-window.positions = []; // 存放所有持倉數據
 
 // 更新畫面資訊
 
 $(document).ready(function () {
 
     const tradeLine = $('<div class="trade-line"></div>').appendTo('body'); // 建倉拖拉線
-    const chart = echarts.init(document.getElementById('chart'));
+    const chartDom = document.getElementById('chart');
+    const chart = echarts.init(chartDom);
+    //更新浮動圖表
+    chart.off('finished').on('finished', function () {
+        updatefloatingChart();
+    });
+    // 浮動圖表
+    let lastChartImage = '';
+    let chartRectChanged = false;
+    const floatingChart = $('#floating-chart');
+    floatingChart.draggable({
+        containment: "window"  // 限制在視窗內部拖動
+    });
+
     const positionOptions = [
         { id: 'long_mini', text: '小台多單' },
         { id: 'short_mini', text: '小台空單' },
@@ -67,20 +91,40 @@ $(document).ready(function () {
     let startCell = null; // 開始的單元格
     let endCell = null; // 結束的單元格
 
+    // 初始數字配入
     $('#market-price').val(underlyingPrice);
     $('#analysis-width').val(analysisWidth);
     $('#precision').val(part);
+    $("#opFee").val(window.opFee);
+    $("#miniFee").val(window.miniFee);
 
     // 配置區更新
-    $('.overall_config').on('change',function () {
+    $('.overall_config').off('change').on('change',function () {
         underlyingPrice = Number($('#market-price').val()||underlyingPrice);
         analysisWidth = Number($('#analysis-width').val()||analysisWidth);
+
+        isdrawtest = $('#isdrawtest').is(':checked');
+        iscalctest = $('#iscalctest').is(':checked');
+
+        opFee = Number($('#opFee').val()||opFee);
+        miniFee = Number($('#miniFee').val()||miniFee);
+
         part = Number($('#precision').val()||part);
         priceRange = { min: underlyingPrice*(1-analysisWidth/100), max: underlyingPrice*(1+analysisWidth/100) };
-        console.log(analysisWidth);
+ 
         updateOptionTable();
         updateChart();
     });
+
+    $('#isdrawtest').off('click').on('click', function(){
+        const $isdrawtest = $(this);
+        $('.istest:checked').each(function(){
+            const $tr = $(this).closest('tr');
+            $tr.find('.isactive').prop('checked', $isdrawtest.is(':checked'));
+            updatePositions($tr);
+        });
+    });
+
     // 新增倉位
     $('#addPosition').off('click').on('click', () => addItem(0, 0,''));
 
@@ -101,6 +145,8 @@ $(document).ready(function () {
         if(e.button === 0){
             tradeLine.show().css({ top: e.pageY, left: e.pageX,height:0 });
         }
+        if (startCell.hasClass('call')) {startCell.css('background-color', '#7e0104');}
+        if (startCell.hasClass('put')) {startCell.css('background-color', '#045b1c');}
     });
     // 建倉表事件 拖拉
     $(document).off('mousemove').on('mousemove', function (e) {
@@ -166,22 +212,66 @@ $(document).ready(function () {
         }
     });
 
-
+    // 滾動事件監聽
+    $(window).off('scroll').on('scroll', updatefloatingChart);
 
     // 建倉表禁用預設右鍵
-    $('.trade-builder').on('contextmenu', function(e) {
+    $('.trade-builder').off('contextmenu').on('contextmenu', function(e) {
         e.preventDefault(); 
     });
 
-    // 持倉改動更新畫面
+    // 持倉改動
     $('#positions tbody').off('change').on('change', 'select, input', function () {
-        updatePositions($(this).closest('tr'));
+
+        const $tr = $(this).closest('tr');
+        const $istest = $tr.find('.istest');
+        const $isclosed = $tr.find('.isclosed');
+
+        //勾選已平倉時將測試倉取消
+        $(this).hasClass('isclosed') && $istest.prop('checked', false);
+        //勾選測試倉時將已平倉取消
+        $(this).hasClass('istest') && $isclosed.prop('checked', false);
+
+        updatePositions($tr);
         updateChart();
     });
 
+    
     initChart();
-    updateChart();
     updateOptionTable();
+    updateChart();
+
+    function updatefloatingChart() {
+        const chartRect = chartDom.getBoundingClientRect();
+        if (chartRect.bottom < 0) {
+
+            // 計算小圖的寬高
+            const ratio = 1.7;
+            // 更新浮動圖
+            floatingChart.css({
+                width: `${chartDom.offsetWidth / ratio}px`,
+                height: `${chartDom.offsetHeight / ratio}px`,
+            });
+            // 使用 ECharts 提供的 getDataURL 獲取當前圖表的圖片
+            if (!lastChartImage || chartRectChanged) {
+                lastChartImage = chart.getDataURL({
+                    backgroundColor: '#000', // 背景色
+                });
+                floatingChart.attr('src', lastChartImage);
+            }
+            floatingChart.css('visibility', 'visible');
+            floatingChart.stop().animate({ opacity: 0.8 },300);
+            chartRectChanged = false;
+        } else {
+            floatingChart.stop().animate({ opacity: 0 },300,
+                function() {
+                    floatingChart.css('visibility', 'hidden');
+                }
+            );
+        }
+        
+
+    }
 
     function groupPositionsByGroupId(totalPositions) {
         const grouped = {};  // 用來存儲按 groupId 分組的結果
@@ -293,7 +383,7 @@ $(document).ready(function () {
                 <td><input type="number" class="cost" placeholder="建倉成本" /></td>
                 <td><input type="number" class="quantity" placeholder="持倉數量" value="1" /></td>
                 <td><input type="checkbox" class="istest" checked/></td>
-                <td><input type="checkbox" class="isactive" checked/></td>
+                <td><input type="checkbox" class="isactive" ${isdrawtest?'checked':''}/></td>
                 <td><input type="checkbox" class="isclosed"/></td>
                 <td><input type="number" class="close-amount" placeholder="平倉點數" /></td>
                 <td><input type="text" class="groupId" placeholder="分組標籤" /></td>
@@ -467,6 +557,7 @@ $(document).ready(function () {
         const mm_marginData = [];
         const profitRateData = [];
 
+
         const profitPrice = new Array(part).fill(0); // 價位陣列
         const totalProfit = new Array(part).fill(0); // 持倉單總損益陣列
         const testTotalProfit = new Array(part).fill(0); // 測試單加持倉單總損益陣列
@@ -476,6 +567,8 @@ $(document).ready(function () {
         const mm_totalMargin = new Array(part).fill(0); // 保證金陣列
 
         const profitRate = new Array(part).fill(0); // 獲利率陣列
+
+        chartRectChanged = true;
 
         //更新分組資料
         const groupPositions = groupPositionsByGroupId(positions);
@@ -492,9 +585,17 @@ $(document).ready(function () {
                 mm_totalMargin[i] += mm_marginData.margin;
             }
         }
+        
+        // 計算測試倉個數
+        let testPositionsCount = 0; 
+        // 計算總交易個數
+        let tradeOpCount = 0; 
+        let tradeMiniCount = 0;
+        // 總期交稅
+        let totalOpTax = 0.0; 
+        let totalMiniTax = 0.0;
 
         // 遍歷每個倉位
-        let testPositionsCount = 0; // 計算測試倉個數
         positions.forEach((pos, index) => {
             // 檢查倉位數據是否完整
             if (
@@ -514,9 +615,30 @@ $(document).ready(function () {
             const test = pos.quantity || 1;
             const closeAmount = pos.closeAmount || 0;
 
+            const isMini = pos.type.split('_')[1] === 'mini';
+            const isClosed = pos.isclosed;
+            const isTest = pos.istest;
+
+            // 基礎稅額計算公式
+            const taxBase = (cost + (isClosed ? closeAmount : 0)) * contractMultiplier;
+
+            if(!isTest || iscalctest){
+                if (isMini) {
+                    // 手續費
+                    tradeMiniCount += (isClosed ? quantity * 2 : quantity);
+                    // 期交稅計算
+                    totalMiniTax += Math.round(taxBase * miniTaxRate,0) * quantity;
+                } else {
+                    // 手續費
+                    tradeOpCount += (isClosed ? quantity * 2 : quantity);
+                    // 期交稅計算
+                    totalOpTax += Math.round(taxBase * opTaxRate,0) * quantity;
+                }
+            }
+
             // 遍歷收盤價格範圍
             for (let i = 0; i <= part; i++) {
-                let closingPrice = priceRange.min + (priceRange.max - priceRange.min) / part * i;
+                let closingPrice = Math.round(priceRange.min + (priceRange.max - priceRange.min) / part * i,0);
                 let profit = 0;
                 if(!pos.isclosed){
                     switch (pos.type) {
@@ -572,22 +694,32 @@ $(document).ready(function () {
                 }
                 // 測試加持倉
                 testTotalProfit[i] += profit;
-
                 profitPrice[i] = closingPrice;
             }
 
         });
 
+        // 計算手續費
+        const totalMiniFee = tradeMiniCount * miniFee;
+        const totalOpFee = tradeOpCount * opFee;
+        const totalFee = totalMiniFee + totalOpFee;
+        // 計算期交稅
+        const totalTax = totalMiniTax + totalOpTax;
+
+        const feeAndTax = totalFee + totalTax;
+
+        $('#totalTaxAndFee').text(` (${totalMiniFee} + ${totalMiniTax}) + (${totalOpFee} + ${totalOpTax}) = ${feeAndTax} `);
 
 
         // 組合總損益數據
         profitPrice.forEach((price, i) => {
 
             // 組合損益數據
-            totalData.push([price, totalProfit[i] * contractMultiplier]);
+            totalData.push([price, totalProfit[i] * contractMultiplier - feeAndTax]);
+
             if (testPositionsCount > 0) {
-                totalTestData.push([price, testTotalProfit[i] * contractMultiplier]);
-                onlyTestData.push([price, onlyTestProfit[i] * contractMultiplier]);
+                totalTestData.push([price, testTotalProfit[i] * contractMultiplier - feeAndTax]);
+                onlyTestData.push([price, onlyTestProfit[i] * contractMultiplier - feeAndTax]);
             }
 
             // 組合保證金數據
@@ -595,8 +727,12 @@ $(document).ready(function () {
             mm_marginData.push([price, mm_totalMargin[i]]);
 
             // 保證金獲利率
-            profitRateData.push([price, testTotalProfit[i] * contractMultiplier / od_totalMargin[i]]);
-            
+            profitRateData.push(
+                [
+                    price, 
+                    od_totalMargin[i] !== 0 ? ((testTotalProfit[i] * contractMultiplier - feeAndTax) / od_totalMargin[i]) : 0
+                ]
+            );
         });
 
         // 夜間模式配色配置
@@ -611,8 +747,8 @@ $(document).ready(function () {
                 position: 'cyan',       // 持倉線顏色
                 applied: 'orange',      // 套用後線顏色
                 test: 'red',            // 測試倉線顏色
-                od: '#B766AD',           // 原始保證金線顏色
-                mm: 'red',              // 維持保證金線顏色
+                od: '#B766AD',          // 原始保證金線顏色
+                mm: '#B766AD',          // 維持保證金線顏色
             },
             tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
             tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色
@@ -831,7 +967,7 @@ $(document).ready(function () {
                     color: nightModeColors.seriesColors.applied,
                     lineStyle: {
                         type: 'dashed',
-                        width: 2
+                        width: 1
                     }
                 },
                 {
@@ -847,7 +983,7 @@ $(document).ready(function () {
                     color: nightModeColors.seriesColors.test,
                     lineStyle: {
                         type: 'dashed',
-                        width: 2
+                        width: 1
                     }
                 },
                 // 下方圖表數據
@@ -878,6 +1014,7 @@ $(document).ready(function () {
                     },
                     color: nightModeColors.seriesColors.mm,
                     lineStyle: {
+                        type: 'dashed',
                         width: 2
                     }
                 },

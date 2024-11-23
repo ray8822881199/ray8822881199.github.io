@@ -20,6 +20,7 @@ input, textarea {
     vertical-align: middle;
 }
 
+
 button {
     background-color: #444;    /* 按鈕背景深灰色 */
     color: #fff;               /* 按鈕文字白色 */
@@ -136,6 +137,15 @@ button:active {
     background-color: #1e1e1e; /* 深色背景 */
     color: #e0e0e0; /* 淺色文字 */
 }
+#main_config span{
+    margin: 15px 0px;
+}
+
+/* 右側空間 */
+.right {
+    width: 250px;
+    background-color: #1e1e1e;
+}
 
 /* 圖表 */
 #chart {
@@ -144,6 +154,18 @@ button:active {
     border: 1px solid #444; /* 深色邊框 */
     background-color: #1e1e1e; /* 深色背景 */
 }
+#floating-chart {
+    position: fixed; 
+    top: 10px; 
+    right: 10px; 
+    width: 100px; 
+    height: 100px; 
+    z-index: 1000; 
+    border: 1px solid #ccc;
+    opacity: 0;
+    visibility: hidden;
+}
+
 
 /* 成交線 */
 .trade-line {

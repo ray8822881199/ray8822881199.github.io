@@ -9,6 +9,7 @@
 
     <title>選擇權倉位損益計算機</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -30,6 +31,7 @@
             警語：<br>
             1.期貨交易具有一定風險，交易人應先評估本身資金及所能擔負之風險，過去績效或未來預期的表現不可作為日後績效之保證。<br>
             2.實際可交易商品相關資訊請以主管機關公告為限。<br>
+            3.本計算機所示資料僅供參考，計算方式紀錄於網頁下方，實際計算方式請以主管機關公告為準。<br>
         </p>
     </div>
     <div>
@@ -52,19 +54,32 @@
                 <button id="comfirmPosition">測試倉套用</button>
                 <span>
                     <label for="market-price">大盤價平</label>
-                    <input type="text" id="market-price" class="overall_config market-price" placeholder="大盤價平" />
+                    <input type="number" id="market-price" class="overall_config" placeholder="大盤價平" />
                 </span>
                 <span>
+                    <label for="opFee">選擇權手續費:</label>
+                    <input type="number" id="opFee" class="overall_config" placeholder="手續費"/>
+                    <label for="miniFee">期貨手續費:</label>
+                    <input type="number" id="miniFee" class="overall_config" placeholder="手續費"/>
+                </span>
+                <br>
+                <span>
+                    <label for="isdrawtest">測試倉是否納入 : </label>
+                    <input type="checkbox" id="isdrawtest" class="overall_config" checked/>
+                    <label for="iscalctest">測試倉是否計算手續 : </label>
+                    <input type="checkbox" id="iscalctest" class="overall_config" checked/>
                     <label for="analysis-width">分析寬度</label>
-                    <input type="range" id="analysis-width" class="overall_config analysis-width" placeholder="分析寬度" min="1" max="10"/>
-                </span>
-                <span>
+                    <input type="range" id="analysis-width" class="overall_config" placeholder="分析寬度" min="1" max="10"/>
                     <label for="precision">精細度</label>
-                    
-                    <input type="range" id="precision" class="overall_config precision" placeholder="精細度" min="50" max="200"/>
+                    <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200"/>
+                </span>
+                <br>
+                <span>
+                    <span>總費用試算 : ( (期貨手續 + 期貨期交稅) + (選擇權手續 + 選擇權期交稅) ) : </span><span id="totalTaxAndFee">0</span>
                 </span>
             </div>
             <div id="chart"></div>
+            <img id="floating-chart"/>
             <table id="positions" border="1">
                 <thead>
                     <tr>
@@ -76,7 +91,7 @@
                         <th>是否計算</th>
                         <th>已平倉</th>
                         <th>平倉點數</th>
-                        <th>組合</th>
+                        <th>組合單代碼</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -92,6 +107,7 @@
                 </tfoot>
             </table>
         </div>
+        <div class="right"></div>
     </div>
     <div id="opknows">
         <h1>如何計算選擇權保證金?</h1>
@@ -284,6 +300,7 @@
 
     <!-- 引用 JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
     <script src="script.js"></script> <!-- 本地 JavaScript 文件 -->
     
