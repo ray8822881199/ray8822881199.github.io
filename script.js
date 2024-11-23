@@ -619,21 +619,22 @@ $(document).ready(function () {
             const isClosed = pos.isclosed;
             const isTest = pos.istest;
 
-            // 稅額計算公式
-            const taxBase = cost * contractMultiplier;
-            const taxBaseClose = ( isClosed ? closeAmount : 0 ) * contractMultiplier;
-
+            // 稅額計算
             if(!isTest || iscalctest){
                 if (isMini) {
                     // 手續費
                     tradeMiniCount += (isClosed ? quantity * 2 : quantity);
                     // 期交稅計算
-                    totalMiniTax += (Math.round(taxBase * miniTaxRate,0) + Math.round(taxBaseClose * miniTaxRate,0)) * quantity;
+                    totalMiniTax += 
+                        (Math.round((strikePrice * contractMultiplier) * miniTaxRate,0) + 
+                        Math.round((( isClosed ? closeAmount : 0 ) * contractMultiplier) * miniTaxRate,0)) * quantity;
                 } else {
                     // 手續費
                     tradeOpCount += (isClosed ? quantity * 2 : quantity);
                     // 期交稅計算
-                    totalOpTax += (Math.round(taxBase * opTaxRate,0) + Math.round(taxBaseClose * opTaxRate,0)) * quantity;
+                    totalOpTax += 
+                        (Math.round((cost * contractMultiplier) * opTaxRate,0) + 
+                        Math.round((( isClosed ? closeAmount : 0 ) * contractMultiplier) * opTaxRate,0)) * quantity;
                 }
             }
 
