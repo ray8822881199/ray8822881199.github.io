@@ -416,9 +416,6 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
         row.find('.quantity').val(itemQuantity); // 填充 quantity
     }
 
-    // 觸發更新
-    row.find('.position-select').trigger('change');
-
     row.off('click').on('click', '.remove-btn', function () {
         // 抓取被點擊的 row 的 data-id
         const idToRemove = Number(row.data('id'));
@@ -433,6 +430,8 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
         // 更新圖表或其他動作
         updateChart();
     });
+    // 觸發更新
+    row.find('.position-select').trigger('change');
 };
 
 window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal) {
@@ -583,11 +582,16 @@ window.updateChart = function () {
         let closingPrice = priceRange.min + (priceRange.max - priceRange.min) / part * i;
         for (let index = 0; index < groupPositions.length; index++) {
             let ps = groupPositions[index];
-            // 計算每個 position 組合的保證金和權利金
-            const od_marginData = calculateComboMarginAndPremium(ps, closingPrice, true);
-            const mm_marginData = calculateComboMarginAndPremium(ps, closingPrice, false);
-            od_totalMargin[i] += od_marginData.margin;
-            mm_totalMargin[i] += mm_marginData.margin;
+            try {
+                // 計算每個 position 組合的保證金和權利金
+                const od_marginData = calculateComboMarginAndPremium(ps, closingPrice, true);
+                const mm_marginData = calculateComboMarginAndPremium(ps, closingPrice, false);
+                od_totalMargin[i] += od_marginData.margin;
+                mm_totalMargin[i] += mm_marginData.margin;
+            } catch (error) {
+                //console.error(`Error calculating margin for position group at closing price ${closingPrice}:`, error);
+                continue;
+            }
         }
     }
     
