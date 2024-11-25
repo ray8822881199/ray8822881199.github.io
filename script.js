@@ -53,6 +53,8 @@ $("#mm-miniMargin").text(window.marginInfo.mm.miniMargin);
 $("#mm-AValue").text(window.marginInfo.mm.AValue);
 $("#mm-BValue").text(window.marginInfo.mm.BValue);
 $("#mm-CValue").text(window.marginInfo.mm.CValue);
+$("#opTaxRate").text(window.opTaxRate);
+$("#miniTaxRate").text(window.miniTaxRate);
 
 
 const tradeLine = $('<div class="trade-line"></div>').appendTo('body'); // 建倉拖拉線
