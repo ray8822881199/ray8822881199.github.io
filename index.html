@@ -24,15 +24,27 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MCP2Q4RN"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <h1>選擇權倉位損益計算機</h1>
+    <header>
+        <h1>選擇權倉位損益計算機</h1>
+    </header>
+    
     <div>
-        <p>
-            輸入當前大盤點位並利用滑鼠在左側點選拖拉建立你的倉位，即可看到你的策略在各個位置的表現。<br><br>
-            警語：<br>
-            1.期貨交易具有一定風險，交易人應先評估本身資金及所能擔負之風險，過去績效或未來預期的表現不可作為日後績效之保證。<br>
-            2.實際可交易商品相關資訊請以主管機關公告為限。<br>
-            3.本計算機所示資料僅供參考，計算方式紀錄於網頁下方，實際計算方式請以主管機關公告為準。<br>
-        </p>
+        <div id="top-container">
+            <div class="description">
+                <p>
+                    輸入當前大盤點位並利用滑鼠在左側點選拖拉建立你的倉位，即可看到你的策略在各個位置的表現。<br>
+                    左鍵單擊建立買方部位，右鍵單擊建立賣方部位。(僅左鍵可進行拖拉組合倉)<br>
+                    分組中輸入相同文字代表互為組合單，保證金的計算會優先參考。(只允許組合兩個部位)<br>
+                    請自行輸入手續費基數，系統會參考此基數進行費用試算。
+                </p>
+            </div>
+            <div class="Warning">
+                警語：<br>
+                1.期貨交易具有一定風險，交易人應先評估本身資金及所能擔負之風險，過去績效或未來預期的表現不可作為日後績效之保證。<br>
+                2.實際可交易商品相關資訊請以主管機關公告為限。<br>
+                3.本計算機所示資料僅供參考，計算方式紀錄於網頁下方，實際計算方式請以主管機關公告為準。<br>
+            </div>
+        </div>
     </div>
     <div>
         <div class="trade-builder">
@@ -245,6 +257,20 @@
                 <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
             </ul>
         </div>
+        <div class="adsense">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                 crossorigin="anonymous"></script>
+            <!-- content-rectangle-1 -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-6002813508124164"
+                 data-ad-slot="3044871900"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
 
         <div class="text-block">
             <h2>計算機使用之參數</h2>
@@ -271,22 +297,17 @@
                 <li>期貨期交稅率：<strong><span id="miniTaxRate"></span></strong></li>
             </ul>
         </div>
-        <div class="adsense">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
-                 crossorigin="anonymous"></script>
-            <!-- content-rectangle-1 -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-6002813508124164"
-                 data-ad-slot="3044871900"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+        <div class="donate-block">
+            <div id="bmcafe">如果喜歡這個工具的話，不妨請平方喝杯咖啡？</div>
+            <div>
+                <a href="https://p.ecpay.com.tw/5F8984E" target="_blank" rel="noopener noreferrer">
+                    <img src="ecpay.png" alt="Buy Me a Coffee" style="width:150px;">
+                </a>
+            </div>
         </div>
         <div class="privacy-policy">
             我們的網站使用 Google AdSense 廣告系統，Google 可能會使用 Cookie 和網頁信標來顯示根據您興趣量身定制的廣告。<br>
+            若繼續使用本網站，表示您同意我們的 <a href="privacy-policy.html" target="_blank" rel="noopener noreferrer">隱私政策</a>。<br>
             我們不會主動蒐集任何個人資料，但 Google 會根據其隱私政策處理這些資料，並為您展示有關的廣告。<br>
             我們使用 Google Analytics 分析網站的流量，幫助我們瞭解哪些頁面受歡迎，並進行網站優化。<br>
             請注意，您也可以在瀏覽器設置中禁用或清除所有 Cookie，但這可能會影響您使用我們網站的體驗。<br>
@@ -299,7 +320,7 @@
             本網站上所有內容，包括文字、圖形、標誌、設計以及源代碼，均受到適用的著作權法律保護。  
             未經授權，嚴禁用於商業或非法用途的複製、分發或修改。  
         </p>
-        <p><a href="privacy-policy.html">隱私政策</a> | 如有任何需要，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
+        <p><a href="privacy-policy.html" target="_blank">隱私政策</a> | 如有任何需要，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
     </footer>
 
     <!-- 引用 JavaScript -->

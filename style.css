@@ -51,10 +51,10 @@ button:active {
 }
 #opknows h2,
 #opknows strong,
-#opknows a{
+#opknows .text-block a{
     color: #fff;
 }
-#opknows>div{
+#opknows>div {
     background-color: #1e1e1e; /* 深色背景 */
     padding: 10px 20px;
     margin: 30px 0px;
@@ -64,6 +64,14 @@ button:active {
 }
 #opknows li>p{
     margin: 0 40px;
+}
+.Warning {
+    background-color: #1e1e1e; /* 深色背景 */
+    padding: 10px 20px;
+    margin: 10px 0px;
+}
+#top-container {
+    width: 100%;
 }
 
 
@@ -75,16 +83,36 @@ button:active {
 }
 .trade-builder {
     width: 250px;
+    background-color: #1e1e1e;
 }
 .container {
     width: calc(100vw - 250px);
 }
+.right {
+    width: 250px;
+    background-color: #1e1e1e;
+}
+
+.donate-block div {
+    display: flex;
+    margin: 15px 0px;
+}
+.donate-block div>a {
+    margin: auto;
+}
+#bmcafe {
+    display: block;
+    text-align: center;
+    font: 1.2em sans-serif;
+    font-weight: bold;
+}
+
 
 /* 建倉表 */
 #optionTable {
     border-collapse: collapse;
     width: 100%;
-    background-color: #1e1e1e; /* 深色背景 */
+    background-color: #151515; /* 深色背景 */
 }
 #optionTable td, 
 #optionTable th {
@@ -103,7 +131,7 @@ button:active {
 /* 持倉表 */
 #positions {
     width: 100%;
-    background-color: #1e1e1e; /* 深色背景 */
+    background-color: #151515; /* 深色背景 */
 }
 #positions thead {
     position: sticky;
@@ -141,11 +169,7 @@ button:active {
     margin: 15px 0px;
 }
 
-/* 右側空間 */
-.right {
-    width: 250px;
-    background-color: #1e1e1e;
-}
+
 
 /* 圖表 */
 #chart {
@@ -174,9 +198,14 @@ button:active {
     pointer-events: none; /* 避免線條干擾操作 */
 }
 
-.privacy-policy {
+.privacy-policy, 
+.Warning {
     font-size: 11px; /* 縮小字體 */
     color: #b0b0b0; /* 淺灰色文字 */
+}
+.privacy-policy a {
+    color: #00b894; /* 醒目的綠色連結 */
+    text-decoration: none; /* 移除底線 */
 }
 
 .text-block a {
