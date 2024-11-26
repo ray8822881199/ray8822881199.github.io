@@ -300,7 +300,11 @@ input[type="checkbox"]:checked::after {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);   /* 旋轉形成對勾 */
 }
-
+input[readonly] {
+    background-color: #555;  /* 更深的背景色 */
+    color: #999;             /* 更灰的文字顏色 */
+    pointer-events: none;
+}
 /* 懸停效果 */
 input[type="checkbox"]:hover {
     border-color: #888;         /* 邊框變亮 */

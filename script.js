@@ -346,10 +346,12 @@ window.updateOptionTable = function () {
 };
 
 window.updatePositions = function (row) {
+    const $cost = row.find('.cost');
+
     const positionId = Number(row.data('id'));
     const type = row.find('.position-select').val();
     const strikePrice = parseFloat(row.find('.strike-price').val()) || 0;
-    const cost = parseFloat(row.find('.cost').val()) || 0;
+    const cost = parseFloat($cost.val()) || 0;
     const quantity = parseFloat(row.find('.quantity').val()) || 0;
     const istest = row.find('.istest').is(':checked');
     const isactive = row.find('.isactive').is(':checked');
@@ -357,6 +359,14 @@ window.updatePositions = function (row) {
     const closeAmount = parseFloat(row.find('.close-amount').val()) || 0;
     const groupId = row.find('.groupId').val() || '';
     const pos = positions.find((p) => p.positionId === positionId);
+
+    // 期貨填寫格式限制
+    if (type && type.split('_')[1] === 'mini') {
+        $cost.prop('readonly', true); 
+    } else {
+        $cost.prop('readonly', false);
+    }
+
     if(pos){
         Object.assign(pos, {type,strikePrice,cost,quantity,istest,isactive,isclosed,closeAmount,groupId});
     }else{
@@ -845,10 +855,10 @@ window.updateChart = function () {
             if(!pos.isclosed){
                 switch (pos.type) {
                     case 'long_mini':
-                        profit = (closingPrice - strikePrice - cost) * quantity;
+                        profit = (closingPrice - strikePrice ) * quantity;
                         break;
                     case 'short_mini':
-                        profit = (strikePrice - closingPrice - cost) * quantity;
+                        profit = (strikePrice - closingPrice ) * quantity;
                         break;
                     case 'buy_call':
                         profit = closingPrice <= strikePrice ? -cost * quantity : (closingPrice - strikePrice - cost) * quantity;
