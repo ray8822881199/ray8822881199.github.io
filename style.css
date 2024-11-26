@@ -146,18 +146,15 @@ button:active {
     text-align: center;
     color: #e0e0e0; /* 淺色文字 */
 }
-.position-row {
-    display: flex;
-    align-items: center;
-}
-.position-row select, 
+
+
 .position-row input {
-    margin-right: 10px;
-}
-.position-row input {
-    width: 100px;
+    width: 80px;
     background-color: #333; /* 深色背景 */
     color: #e0e0e0; /* 淺色文字 */
+}
+.position-row .groupId {
+    width: 150px;
 }
 
 #main_config {

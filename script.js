@@ -1,4 +1,4 @@
-/* jshint esversion: 6 */
+/* jshint esversion: 8 */
 /*
  * Copyright © 2024 Ray. All Rights Reserved.
  * 本網站上所有內容，包括文字、圖形、標誌、設計以及源代碼，均受到適用的著作權法律保護。  未經授權，嚴禁用於商業或非法用途的複製、分發或修改。  
@@ -218,6 +218,30 @@ $(document).ready(function () {
     // 滾動事件監聽
     $(window).off('scroll').on('scroll', updatefloatingChart);
 
+    // 匯出
+    $('#exportButton').off('click').on('click', function(e){
+        exportJSONToCSV(positions, "positions.csv");
+    });
+    // 匯入
+    $("#importButton").off('click').on("click", async function () {
+        const $input = $("#csvFileInput"); 
+        if (!$input[0].files || $input[0].files.length === 0) {
+            alert("請選擇檔案");
+            return;
+        }
+        const file = $input[0].files[0]; // 取得檔案
+        try {
+            const json = await importCSVFile(file);
+            //$("#output").text(JSON.stringify(json, null, 4)); // 更新輸出內容
+            console.log(json);
+            processImportedJSON(json);
+
+        } catch (error) {
+            console.error(error);
+            alert("匯入失敗");
+        }
+    });
+
     // 建倉表禁用預設右鍵
     $('.trade-builder').off('contextmenu').on('contextmenu', function(e) {
         e.preventDefault(); 
@@ -268,7 +292,7 @@ window.updatefloatingChart = function () {
             floatingChart.attr('src', lastChartImage);
         }
         floatingChart.css('visibility', 'visible');
-        floatingChart.stop().animate({ opacity: 0.8 },300);
+        floatingChart.stop().animate({ opacity: 0.9 },300);
         chartRectChanged = false;
     } else {
         floatingChart.stop().animate({ opacity: 0 },300,
@@ -377,7 +401,7 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
         -1 // 當沒有任何 row 時，返回 -1
     ) + 1;
     const row = $(`
-        <tr data-id="${positionId}">
+        <tr data-id="${positionId}" class="position-row">
             <td>
                 <select class="position-select">
                     <option value="" disabled selected>選擇類型</option>
@@ -435,6 +459,171 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
     // 觸發更新
     row.find('.position-select').trigger('change');
 };
+
+
+window.exportJSONToCSV = function (jsonArray, filename) {
+    // 如果是空的 JSON 陣列，則退出
+    if (!jsonArray || jsonArray.length === 0) {
+        confirm("沒有持倉資料，請先建立再匯出。");
+        return;
+    }
+
+    // 提取 JSON 中的所有鍵，作為 CSV 標題列
+    const headers = Object.keys(jsonArray[0]);
+    const csvRows = [];
+
+    // 加入標題列
+    csvRows.push(headers.join(","));
+
+    // 轉換每個物件為 CSV 格式
+    jsonArray.forEach(obj => {
+        const row = headers.map(header => {
+            // 避免值中有逗號和換行，需加引號處理
+            const value = obj[header] !== null ? obj[header] : '';
+            return `"${value}"`;
+        });
+        csvRows.push(row.join(","));
+    });
+
+    // 將所有行組合成 CSV 字串
+    const csvContent = csvRows.join("\n");
+
+    // 建立 Blob，並生成下載 URL
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    if (confirm("是否匯出當前持倉？")) {
+        link.click();
+    } else {
+        console.log("使用者選擇了取消");
+    }
+    document.body.removeChild(link);
+};
+
+// 匯入 CSV 並轉換為 JSON 的函數
+window.importCSVFile = function (file) {
+
+    function parseCSVValue (value) {
+        if (value === "true") return true; // 字串轉布林值 true
+        if (value === "false") return false; // 字串轉布林值 false
+        if (!isNaN(value) && value.trim() !== "") return parseFloat(value); // 字串轉數值
+        return value !== undefined && value !== null ? value : null; // 預設值為 null
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        // 當讀取完成
+        reader.onload = function (event) {
+            const csvContent = event.target.result;
+            const lines = csvContent.split("\n").map(line => line.trim());
+
+            // 提取標題列
+            const headers = lines[0].split(",").map(header => header.replace(/"/g, ""));
+            
+            // 解析每一行成 JSON
+            const jsonArray = lines.slice(1).map(line => {
+                const values = line.split(",").map(value => value.replace(/"/g, ""));
+                const json = {};
+                headers.forEach((header, index) => {
+                    json[header] = parseCSVValue(values[index]); // 若無值則為 null
+                });
+                return json;
+            });
+
+            resolve(jsonArray); // 回傳 JSON 陣列
+        };
+
+        // 當讀取出現錯誤
+        reader.onerror = function () {
+            reject("無法讀取檔案");
+        };
+
+        // 開始讀取檔案
+        reader.readAsText(file, "utf-8");
+    });
+};
+
+
+window.importCSVFile = function (file) {
+    function parseCSVValue(value) {
+        if (value === "true") return true; // 字串轉布林值 true
+        if (value === "false") return false; // 字串轉布林值 false
+        if (!isNaN(value) && value.trim() !== "") return parseFloat(value); // 字串轉數值
+        return value !== undefined && value !== null ? value : null; // 預設值為 null
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        // 當讀取完成
+        reader.onload = function (event) {
+            const csvContent = event.target.result;
+            const lines = csvContent.split("\n").map(line => line.trim()).filter(line => line); // 過濾空行
+
+            // 確保有資料
+            if (lines.length < 2) {
+                reject("CSV 檔案內容無效或無資料");
+                return;
+            }
+
+            // 提取標題列
+            const headers = lines[0].split(",").map(header => header.replace(/"/g, "").trim());
+            
+            // 解析每一行成 JSON
+            const jsonArray = lines.slice(1).map(line => {
+                const values = line.split(",").map(value => value.replace(/"/g, "").trim());
+                const json = {};
+                headers.forEach((header, index) => {
+                    json[header] = parseCSVValue(values[index]); // 若無值則為 null
+                });
+                return json;
+            });
+
+            resolve(jsonArray); // 回傳 JSON 陣列
+        };
+
+        // 當讀取出現錯誤
+        reader.onerror = function () {
+            reject("無法讀取檔案");
+        };
+
+        // 開始讀取檔案
+        reader.readAsText(file, "utf-8");
+    });
+};
+
+
+window.processImportedJSON = function (jsonArray) {
+    if (!Array.isArray(jsonArray)) {
+        console.error("匯入的資料不是有效的 JSON 陣列");
+        return;
+    }
+
+    jsonArray.forEach(item => {
+        // 確保每個物件都有所需屬性
+        if (
+            item.type !== undefined &&
+            item.strikePrice !== undefined &&
+            item.quantity !== undefined
+        ) {
+            const groupId = item.groupId || ''; 
+            const cost = item.cost || 0;
+            // 建立持倉
+            window.addItem(item.type, item.strikePrice, item.groupId, item.cost, item.quantity);
+        } else {
+            console.warn("缺少必要屬性的項目", item);
+        }
+    });
+
+};
+
+
 
 window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal) {
     if (positionIds.length !== 1 && positionIds.length !== 2) {
