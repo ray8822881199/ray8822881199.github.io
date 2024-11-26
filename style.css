@@ -191,6 +191,28 @@ button:active {
     visibility: hidden;
 }
 
+.back-to-top {
+    position: fixed; 
+    bottom: 17px; 
+    right: 17px; 
+    width: 50px; 
+    height: 50px; 
+    z-index: 1000; 
+    opacity: 0;
+    visibility: hidden;
+    background-color: #666;
+}
+.back-to-top::before {
+    content: ''; 
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg); /* 偏移並旋轉 */
+    width: 10px; 
+    height: 10px; 
+    border-left: 3px solid white;
+    border-top: 3px solid white;
+}
 
 /* 成交線 */
 .trade-line {

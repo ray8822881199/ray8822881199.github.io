@@ -65,6 +65,7 @@ const chart = echarts.init(chartDom);
 let lastChartImage = '';
 let chartRectChanged = false;
 const floatingChart = $('#floating-chart');
+const btt = $('.back-to-top')
 
 const positionOptions = [
     { id: 'long_mini', text: '小台多單' },
@@ -306,10 +307,18 @@ window.updatefloatingChart = function () {
         floatingChart.css('visibility', 'visible');
         floatingChart.stop().animate({ opacity: 0.9 },300);
         chartRectChanged = false;
+
+        btt.css('visibility', 'visible');
+        btt.stop().animate({ opacity: 0.5 },300);
     } else {
         floatingChart.stop().animate({ opacity: 0 },300,
             function() {
                 floatingChart.css('visibility', 'hidden');
+            }
+        );
+        btt.stop().animate({ opacity: 0 },300,
+            function() {
+                btt.css('visibility', 'hidden');
             }
         );
     }
