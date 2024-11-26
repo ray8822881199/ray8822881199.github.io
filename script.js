@@ -17,6 +17,7 @@ window.dataDate = new Date('2024-11-11'); // 資料更新日期
 window.underlyingPrice = 23000; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
+window.isshowfloatchart = true; // 計算測試倉
 
 window.opFee = 25; // 選擇權手續
 window.miniFee = 25; // 期貨手續
@@ -117,6 +118,7 @@ $(document).ready(function () {
 
         isdrawtest = $('#isdrawtest').is(':checked');
         iscalctest = $('#iscalctest').is(':checked');
+        isshowfloatchart = $('#isshowfloatchart').is(':checked');
 
         opFee = Number($('#opFee').val()||opFee);
         miniFee = Number($('#miniFee').val()||miniFee);
@@ -284,10 +286,11 @@ $(document).ready(function () {
 
 window.updatefloatingChart = function () {
     const chartRect = chartDom.getBoundingClientRect();
+    if(!isshowfloatchart) return;
     if (chartRect.bottom < 0) {
 
         // 計算小圖的寬高
-        const ratio = 1.7;
+        const ratio = 2;
         // 更新浮動圖
         floatingChart.css({
             width: `${chartDom.offsetWidth / ratio}px`,
@@ -412,7 +415,7 @@ window.calculateOptionMargin = function (strikePrice, optionType, positionType, 
     }
 };
 
-window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuantity) {
+window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuantity, istest=1, isactive=1, isclosed=0) {
     const positionId = Math.max(
         ...$('tr[data-id]').map(function () {
             return Number($(this).data('id'));
@@ -446,20 +449,25 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
 
     // 填入資料
     if (itemType) {
-        row.find('.position-select').val(itemType); // 填充選擇的類型
+        row.find('.position-select').val(itemType);
     }
     if (itemPrice) {
-        row.find('.strike-price').val(itemPrice); // 填充持倉點位
+        row.find('.strike-price').val(itemPrice);
     }
     if (itemGroupId) {
-        row.find('.groupId').val(itemGroupId); // 填充 groupId
+        row.find('.groupId').val(itemGroupId);
     }
     if (itemCost) {
-        row.find('.cost').val(itemCost); // 填充 cost
+        row.find('.cost').val(itemCost);
     }
     if (itemQuantity) {
-        row.find('.quantity').val(itemQuantity); // 填充 quantity
+        row.find('.quantity').val(itemQuantity); 
     }
+
+    // 以是否測試為主，是否關閉要配合是否測試，這樣衝突時在畫面上才看的出來
+    row.find('.isactive').prop('checked', isactive);
+    row.find('.istest').prop('checked', istest);
+    row.find('.isclosed').prop('checked', istest ? false : isclosed);
 
     row.off('click').on('click', '.remove-btn', function () {
         // 抓取被點擊的 row 的 data-id
@@ -522,50 +530,6 @@ window.exportJSONToCSV = function (jsonArray, filename) {
         console.log("使用者選擇了取消");
     }
     document.body.removeChild(link);
-};
-
-// 匯入 CSV 並轉換為 JSON 的函數
-window.importCSVFile = function (file) {
-
-    function parseCSVValue (value) {
-        if (value === "true") return true; // 字串轉布林值 true
-        if (value === "false") return false; // 字串轉布林值 false
-        if (!isNaN(value) && value.trim() !== "") return parseFloat(value); // 字串轉數值
-        return value !== undefined && value !== null ? value : null; // 預設值為 null
-    }
-
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        // 當讀取完成
-        reader.onload = function (event) {
-            const csvContent = event.target.result;
-            const lines = csvContent.split("\n").map(line => line.trim());
-
-            // 提取標題列
-            const headers = lines[0].split(",").map(header => header.replace(/"/g, ""));
-            
-            // 解析每一行成 JSON
-            const jsonArray = lines.slice(1).map(line => {
-                const values = line.split(",").map(value => value.replace(/"/g, ""));
-                const json = {};
-                headers.forEach((header, index) => {
-                    json[header] = parseCSVValue(values[index]); // 若無值則為 null
-                });
-                return json;
-            });
-
-            resolve(jsonArray); // 回傳 JSON 陣列
-        };
-
-        // 當讀取出現錯誤
-        reader.onerror = function () {
-            reject("無法讀取檔案");
-        };
-
-        // 開始讀取檔案
-        reader.readAsText(file, "utf-8");
-    });
 };
 
 
@@ -634,7 +598,7 @@ window.processImportedJSON = function (jsonArray) {
             const groupId = item.groupId || ''; 
             const cost = item.cost || 0;
             // 建立持倉
-            window.addItem(item.type, item.strikePrice, item.groupId, item.cost, item.quantity);
+            window.addItem(item.type, item.strikePrice, item.groupId, item.cost, item.quantity, item.istest, item.isactive, item.isclosed);
         } else {
             console.warn("缺少必要屬性的項目", item);
         }
@@ -1188,7 +1152,7 @@ window.updateChart = function () {
                 color: nightModeColors.seriesColors.applied,
                 lineStyle: {
                     type: 'dashed',
-                    width: 1
+                    width: 2
                 }
             },
             {
@@ -1204,7 +1168,7 @@ window.updateChart = function () {
                 color: nightModeColors.seriesColors.test,
                 lineStyle: {
                     type: 'dashed',
-                    width: 1
+                    width: 2
                 }
             },
             // 下方圖表數據
