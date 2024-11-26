@@ -101,6 +101,15 @@ $(document).ready(function () {
     $("#opFee").val(window.opFee);
     $("#miniFee").val(window.miniFee);
 
+    // 滾動到咖啡
+    $('.scroll-link').off('click').on('click', function(event) {
+        event.preventDefault();
+        const target = $($(this).attr('href')); 
+        $('html, body').animate({
+            scrollTop: target.offset().top
+        }, 200);
+    });
+
     // 配置區更新
     $('.overall_config').off('change').on('change',function () {
         underlyingPrice = Number($('#market-price').val()||underlyingPrice);
@@ -474,7 +483,7 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
 window.exportJSONToCSV = function (jsonArray, filename) {
     // 如果是空的 JSON 陣列，則退出
     if (!jsonArray || jsonArray.length === 0) {
-        confirm("沒有持倉資料，請先建立再匯出。");
+        alert("沒有持倉資料，請先建立再匯出。");
         return;
     }
 
