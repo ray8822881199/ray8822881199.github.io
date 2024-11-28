@@ -360,3 +360,24 @@ input[type="checkbox"]:hover {
 ::-webkit-scrollbar-thumb:hover {
     background-color: #777777; /* 滑塊懸停時顏色 */
 }
+
+
+
+/* 直式螢幕 */
+@media (max-aspect-ratio: 1/1) {
+    .trade-builder, .right {
+        display: none;
+    }
+    .container {
+        width: 100%;
+    }
+    .positions-container {
+        overflow-x: scroll;
+    }
+    #opknows>div {
+        padding: 0px;
+    }
+    #opknows li>p {
+        margin: 0 10px;
+    }
+}

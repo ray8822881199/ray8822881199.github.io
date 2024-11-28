@@ -105,32 +105,34 @@
             </div>
             <div id="chart"></div>
             <img id="floating-chart"/>
-            <table id="positions" border="1">
-                <thead>
-                    <tr>
-                        <th>類型</th>
-                        <th>持倉點位</th>
-                        <th>建倉成本</th>
-                        <th>持倉數量</th>
-                        <th>測試單</th>
-                        <th>是否計算</th>
-                        <th>已平倉</th>
-                        <th>平倉點數</th>
-                        <th>組合單代碼</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- 這裡會動態插入每一筆持倉的資料 -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td>
-                            <button id="addPosition">新增</button>
-                        </td>
-                    </tr> 
-                </tfoot>
-            </table>
+            <div class="positions-container">
+                <table id="positions" border="1">
+                    <thead>
+                        <tr>
+                            <th>類型</th>
+                            <th>持倉點位</th>
+                            <th>建倉成本</th>
+                            <th>持倉數量</th>
+                            <th>測試單</th>
+                            <th>是否計算</th>
+                            <th>已平倉</th>
+                            <th>平倉點數</th>
+                            <th>組合單代碼</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 這裡會動態插入每一筆持倉的資料 -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <button id="addPosition">新增</button>
+                            </td>
+                        </tr> 
+                    </tfoot>
+                </table>
+            </div>
         </div>
         <div class="right"></div>
     </div>
