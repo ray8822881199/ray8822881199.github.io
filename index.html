@@ -68,13 +68,13 @@
                 <button id="comfirmPosition">測試倉套用</button>
                 <span>
                     <label for="market-price">大盤價平</label>
-                    <input type="number" id="market-price" class="overall_config" placeholder="大盤價平" />
+                    <input type="number" inputmode="numeric" id="market-price" class="overall_config" placeholder="大盤價平" />
                 </span>
                 <span>
                     <label for="opFee">選擇權手續費:</label>
-                    <input type="number" id="opFee" class="overall_config" placeholder="手續費"/>
+                    <input type="number" inputmode="numeric" id="opFee" class="overall_config" placeholder="手續費"/>
                     <label for="miniFee">期貨手續費:</label>
-                    <input type="number" id="miniFee" class="overall_config" placeholder="手續費"/>
+                    <input type="number" inputmode="numeric" id="miniFee" class="overall_config" placeholder="手續費"/>
                 </span>
                 <br>
                 <span>
@@ -193,7 +193,7 @@
                 </li>
                 <li>賣權牛市 (Bull Put Spread) ：
                     <p>
-                        賣出較高履約價的賣權，同時買進較低履約價的賣權，適用於看不跌市場。<br>
+                        賣出較高履約價的 Put ，同時買進較低履約價的 Put ，適用於看不跌市場。<br>
                     </p>    
                     *舉例 :<br>
                     <p>
@@ -206,7 +206,7 @@
                 </li>
                 <li>賣權熊市 (Bear Put Spread) ：
                     <p>
-                        買進較高履約價的賣權，同時賣出較低履約價的賣權，用於看跌市場並降低成本。<br>
+                        買進較高履約價的 Put ，同時賣出較低履約價的 Put ，用於看跌市場並降低成本。<br>
                     </p>    
                     *舉例 :<br>
                     <p>
@@ -237,8 +237,8 @@
                     *舉例 :<br>
                     <p>
                         假設我認為大盤會有大幅波動，並預計波動範圍會超過 22800 到 23200 之間。<br>
-                        <strong>買進履約價 22800 的 Put + 買進履約價 23200 的 Call 一共花費 300 點權利金</strong><br>
-                        這樣的組合能夠在大盤結算點數超過 23500 或跌破 22500 時賺取獲利，成本低於跨式。<br>
+                        <strong>買進履約價 22800 的 Put + 買進履約價 23200 的 Call 一共花費 400 點權利金</strong><br>
+                        這樣的組合能夠在大盤結算點數超過 23600 或跌破 22400 時賺取獲利，成本低於跨式。<br>
                         需要注意的是賺取的點數是否能和支付出去的權利金打平<br> 
                         並且 Long Strangle 比 Long Straddle 要求更大的波動
                     </p>
@@ -341,7 +341,9 @@
     <!-- 引用 JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+
     <script src="script.js"></script> <!-- 本地 JavaScript 文件 -->
     
 </body>

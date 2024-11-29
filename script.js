@@ -288,8 +288,19 @@ $(document).ready(function () {
 window.updatefloatingChart = function () {
     const chartRect = chartDom.getBoundingClientRect();
     if(!isshowfloatchart) return;
-    if (chartRect.bottom < 0) {
 
+    if (chartRect.top < 0) {
+        btt.css('visibility', 'visible');
+        btt.stop().animate({ opacity: 0.5 },300);
+    } else {
+        btt.stop().animate({ opacity: 0 },300,
+            function() {
+                btt.css('visibility', 'hidden');
+            }
+        );
+    }
+    
+    if (chartRect.bottom < 0) {
         // 計算小圖的寬高
         const ratio = 2;
         // 更新浮動圖
@@ -307,18 +318,10 @@ window.updatefloatingChart = function () {
         floatingChart.css('visibility', 'visible');
         floatingChart.stop().animate({ opacity: 0.9 },300);
         chartRectChanged = false;
-
-        btt.css('visibility', 'visible');
-        btt.stop().animate({ opacity: 0.5 },300);
     } else {
         floatingChart.stop().animate({ opacity: 0 },300,
             function() {
                 floatingChart.css('visibility', 'hidden');
-            }
-        );
-        btt.stop().animate({ opacity: 0 },300,
-            function() {
-                btt.css('visibility', 'hidden');
             }
         );
     }
@@ -438,13 +441,13 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
                     <option value="" disabled selected>選擇類型</option>
                 </select>
             </td>
-            <td><input type="number" class="strike-price" placeholder="持倉點位" /></td>
-            <td><input type="number" class="cost" placeholder="建倉成本" /></td>
-            <td><input type="number" class="quantity" placeholder="持倉數量" value="1" /></td>
+            <td><input type="number" inputmode="numeric" class="strike-price" placeholder="持倉點位" /></td>
+            <td><input type="number" inputmode="numeric" class="cost" placeholder="建倉成本" /></td>
+            <td><input type="number" inputmode="numeric" class="quantity" placeholder="持倉數量" value="1" /></td>
             <td><input type="checkbox" class="istest" checked/></td>
             <td><input type="checkbox" class="isactive" ${isdrawtest?'checked':''}/></td>
             <td><input type="checkbox" class="isclosed"/></td>
-            <td><input type="number" class="close-amount" placeholder="平倉點數" /></td>
+            <td><input type="number" inputmode="numeric" class="close-amount" placeholder="平倉點數" /></td>
             <td><input type="text" class="groupId" placeholder="分組標籤" /></td>
             <td><button class="remove-btn">移除</button></td>
         </tr>
