@@ -441,17 +441,40 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
                     <option value="" disabled selected>選擇類型</option>
                 </select>
             </td>
-            <td><input type="number" inputmode="numeric" class="strike-price" placeholder="持倉點位" /></td>
-            <td><input type="number" inputmode="numeric" class="cost" placeholder="建倉成本" /></td>
-            <td><input type="number" inputmode="numeric" class="quantity" placeholder="持倉數量" value="1" /></td>
+            <td><input type="number" inputmode="numeric" class="strike-price" placeholder="持倉點位" style="width: 70px;"/></td>
+            <td><input type="number" inputmode="decimal" class="cost" placeholder="建倉成本" style="width: 70px;"/></td>
+            <td>
+                <div class="quantity-wrapper">
+                    <input type="number" inputmode="numeric" class="quantity" placeholder="持倉數量" value="1" style="width: 50px;"/>
+                    <button type="button" class="quantity-btn increase-btn" style="width: 30px;">+</button>
+                    <button type="button" class="quantity-btn decrease-btn" style="width: 30px;">-</button>
+                </div>
+            </td>
             <td><input type="checkbox" class="istest" checked/></td>
             <td><input type="checkbox" class="isactive" ${isdrawtest?'checked':''}/></td>
             <td><input type="checkbox" class="isclosed"/></td>
-            <td><input type="number" inputmode="numeric" class="close-amount" placeholder="平倉點數" /></td>
-            <td><input type="text" class="groupId" placeholder="分組標籤" /></td>
+            <td><input type="number" inputmode="decimal" class="close-amount" placeholder="平倉點數" style="width: 70px;"/></td>
+            <td><input type="text" class="groupId" placeholder="分組標籤" style="width: 150px;"/></td>
             <td><button class="remove-btn">移除</button></td>
         </tr>
     `); 
+
+    // 綁定按鈕事件
+    row.find('.increase-btn').off('click').on('click', function () {
+        const quantityInput = row.find('.quantity');
+        const currentValue = parseInt(quantityInput.val()) || 0;
+        quantityInput.val(currentValue + 1);
+        row.find('.position-select').trigger('change');
+    });
+
+    row.find('.decrease-btn').off('click').on('click', function () {
+        const quantityInput = row.find('.quantity');
+        const currentValue = parseInt(quantityInput.val()) || 0;
+        if (currentValue > 1) {
+            quantityInput.val(currentValue - 1);
+        }
+        row.find('.position-select').trigger('change');
+    });
 
     // 動態加入選項
     positionOptions.forEach(option => {
@@ -951,6 +974,19 @@ window.updateChart = function () {
         tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色
     };
 
+    const axisTextFormatter = (value) => {
+         if (value >= 1e6) {
+             return (value / 1e6) + 'M'; // 百萬
+         } else if (value >= 1e3) {
+             return (value / 1e3) + 'k'; // 千
+         } else if (value <= -1e6) {
+             return (value / 1e6) + 'M'; // 負數百萬
+         } else if (value <= -1e3) {
+             return (value / 1e3) + 'k'; // 負數千
+         }
+         return value; // 小於千的數值不變          
+    };
+
     // 更新圖表
     chart.setOption({
         backgroundColor: nightModeColors.backgroundColor, // 背景顏色
@@ -1019,7 +1055,7 @@ window.updateChart = function () {
             }
         ],
         legend: {
-            show: true, // 開啟圖例
+            show: !window.matchMedia("(max-aspect-ratio: 1/1)").matches, // 開啟圖例
             textStyle: {
                 color: nightModeColors.legendTextColor, // 圖例文字顏色
             }
@@ -1092,7 +1128,12 @@ window.updateChart = function () {
                     lineStyle: {
                         color: nightModeColors.gridColor // 網格線顏色
                     }
-                }
+                },
+                axisLabel: {
+                    formatter: function (value) {
+                        return axisTextFormatter(value);
+                    }
+                },
             },
             {
                 gridIndex: 1, // 下方圖表 Y 軸
@@ -1108,6 +1149,11 @@ window.updateChart = function () {
                 splitLine: {
                     lineStyle: {
                         color: nightModeColors.gridColor // 網格線顏色
+                    }
+                },
+                axisLabel: {
+                    formatter: function (value) {
+                        return axisTextFormatter(value);
                     }
                 },
                 min: 'dataMin',

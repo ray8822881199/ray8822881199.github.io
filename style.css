@@ -153,12 +153,17 @@ button:active {
 
 
 .position-row input {
-    width: 80px;
     background-color: #333; /* 深色背景 */
     color: #e0e0e0; /* 淺色文字 */
 }
-.position-row .groupId {
-    width: 150px;
+.quantity-wrapper {
+    margin: auto;
+    width: max-content;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; 
+    margin: 0; 
 }
 
 #main_config {
@@ -176,8 +181,6 @@ button:active {
 #chart {
     width: 100%;
     height: 400px;
-    border: 1px solid #444; /* 深色邊框 */
-    background-color: #1e1e1e; /* 深色背景 */
 }
 #floating-chart {
     position: fixed; 
@@ -236,6 +239,11 @@ button:active {
     font-size: 18px; /* 縮小字體 */
     font-weight: bold; /* 超連結字體加粗 */
     text-decoration: none; /* 移除超連結底線 */
+}
+
+.fileBtn {
+    width: 100%;
+    margin: 2px 0px;
 }
 
 
@@ -365,11 +373,15 @@ input[type="checkbox"]:hover {
 
 /* 直式螢幕 */
 @media (max-aspect-ratio: 1/1) {
+    .overall_config {
+        width: 96%;
+    }
     .trade-builder, .right {
         display: none;
     }
     .container {
         width: 100%;
+        margin: 0;
     }
     .positions-container {
         overflow-x: scroll;
@@ -380,4 +392,9 @@ input[type="checkbox"]:hover {
     #opknows li>p {
         margin: 0 10px;
     }
+    #main_config span {
+        display: block;
+        margin: 5px 0;
+    }
+    #main_config br {display: none;}
 }

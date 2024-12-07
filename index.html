@@ -65,9 +65,8 @@
         </div>
         <div class="container">
             <div id="main_config">
-                <button id="comfirmPosition">測試倉套用</button>
                 <span>
-                    <label for="market-price">大盤價平</label>
+                    <label for="market-price">大盤價平:</label>
                     <input type="number" inputmode="numeric" id="market-price" class="overall_config" placeholder="大盤價平" />
                 </span>
                 <span>
@@ -80,28 +79,23 @@
                 <span>
                     <input type="checkbox" id="isdrawtest" class="overall_config" checked/>
                     <label for="isdrawtest">測試倉是否納入計算？ </label>
+                </span>
+                <span>
                     <input type="checkbox" id="iscalctest" class="overall_config" checked/>
                     <label for="iscalctest">測試倉是否計算手續？ </label>
+                </span>
+                <span>
                     <input type="checkbox" id="isshowfloatchart" class="overall_config" checked/>
                     <label for="isshowfloatchart">顯示浮動損益圖？ </label>
                 </span>
                 <br>
                 <span>
-                    <label for="analysis-width">分析寬度</label>
-                    <input type="range" id="analysis-width" class="overall_config" placeholder="分析寬度" min="1" max="10"/>
-                    <label for="precision">精細度</label>
-                    <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200"/>
-                </span>
-                <br>
-                <span>
-                    <input type="file" id="csvFileInput" accept=".csv" />
-                    <button id="importButton">匯入並解析</button>
-                    <button id="exportButton">匯出持倉</button>
-                </span>
-                <br>
-                <span>
-                    <span>總費用試算 : ( (期貨手續 + 期貨期交稅) + (選擇權手續 + 選擇權期交稅) ) : </span><span id="totalTaxAndFee">0</span>
-                </span>
+                    <span>總費用試算 : </span>
+                    <span> (期貨手續 + 期貨期交稅) + </span>
+                    <span> (選擇權手續 + 選擇權期交稅) : </span>
+                    <span id="totalTaxAndFee">0</span>
+                </span><br><br>
+                <button id="comfirmPosition">測試倉套用</button>
             </div>
             <div id="chart"></div>
             <img id="floating-chart"/>
@@ -134,7 +128,21 @@
                 </table>
             </div>
         </div>
-        <div class="right"></div>
+        <div class="right">
+            <span>
+                <input type="file" id="csvFileInput" accept=".csv" style="width: calc(100% - 12px);" />
+                <div style="margin: 5px 0px;">
+                    <button id="importButton" class="fileBtn">匯入並解析</button>
+                    <button id="exportButton" class="fileBtn">匯出持倉</button>
+                </div>
+            </span>
+            <span>
+                <label for="analysis-width">分析寬度</label><br>
+                <input type="range" id="analysis-width" class="overall_config" placeholder="分析寬度" min="1" max="10" style="width: calc(100% - 16px);"/><br>
+                <label for="precision">精細度</label><br>
+                <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200" style="width: calc(100% - 16px);"/>
+            </span>
+        </div>
     </div>
     <div id="opknows">
         <h1>如何計算選擇權保證金?</h1>
