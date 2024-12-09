@@ -163,182 +163,261 @@
         </div>
     </div>
     <div id="opknows">
-        <h1>如何計算選擇權保證金?</h1>
-        <!-- 裸賣選擇權 -->
-        <div class="text-block">
-            <h2>裸賣選擇權</h2>
-            <p>
-                裸賣選擇權的保證金計算是根據期權的市場價格、期權的執行價格與標的資產的波動性來計算的。對於台指選擇權，裸賣期權的保證金額度會受到以下因素影響：
-            </p>
-            <ul>
-                <li>價外值 ( Out-of-the-Money Value ) ： 標的資產價格與期權執行價格之間的差距。</li>
-                <li>權利金市值 ( Option Premium Market Value ) ： 期權在市場上的交易價格，包括內在價值和時間價值。</li>
-                <li>A值  ( A-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
-                <li>B值  ( B-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
-                <li>C值  ( C-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
-            </ul>
-            <p>
-                一般來說，裸賣選擇權的保證金計算公式為：<strong>權利金市值 + Max( A值 - 價外值，B值 )</strong>
-            </p>
-            <p>
-                需要注意的是<br>
-                履約價為價外 500點 ~ 1000點 保證金 A、B 值都會加收 20％<br>
-                履約價超過價外 1000點 保證金 A、B 值都會加收 50％<br>
-                因此在進行留倉的時候需要留意這部分，避免不慎被強制平倉影響策略的進行。<br>
-                具體的計算方式可能會隨著不同期權的波動性以及市場情況而調整，請以官方公告為準。
-            </p>
+        <div class="opknows_left">
+            <div> - </div>
         </div>
-        <!-- 複式單 -->
-        <div class="text-block">
-            <h2>複式單</h2>
-            <ul>
-                <li>買權牛市 (Bull Call Spread) ： 
-                    <p>
-                        買進較低履約價的 Call，同時賣出較高履約價的 Call，用以降低成本。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤在結算時會比 23000 高，但又不會超過 23100 時<br>
-                        <strong>買進履約價 23000 的 Call + 賣出履約價 23100 Call</strong><br>
-                        就能形成價差 100 點的 Bull Call Spread 組合單，而這個組合單在大盤結算點數超過 23100 時達到最大獲利，<br>
-                        最大損失發生在大盤結算在 23000 以下。<br>
-                        這個類組合單也叫做<strong>溫漲</strong>。
-                    </p>
-                </li>
-                <li>買權熊市 (Bear Call Spread) ：
-                    <p>
-                        賣出較低履約價的 Call ，同時買進較高履約價的 Call，用以限制風險。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤在結算時會比 23000 低，但又不至於大跌時<br>
-                        <strong>賣出履約價 23000 Call + 買進 23100 Call</strong><br>
-                        就能形成價差 100 點的 Bear Call Spread 組合單，而這個組合單在大盤結算點數低於 23000 時達到最大獲利。<br>
-                        最大損失發生在大盤結算在 23100 以上。<br>
-                        這個類組合單也叫做<strong>溫跌做莊</strong>。
-                    </p>
-                </li>
-                <li>賣權牛市 (Bull Put Spread) ：
-                    <p>
-                        賣出較高履約價的 Put ，同時買進較低履約價的 Put ，適用於看不跌市場。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤會維持在 23000 以上時<br>
-                        <strong>賣出履約價 23000 的 Put + 買進履約價 22900 的 Put</strong><br>
-                        這樣的組合單最大獲利會在大盤結算點數高於 23000 時達成，並且會收取權利金。<br>
-                        最大損失發生在大盤結算在 22900 以下。
-                        這個類組合單也叫做<strong>溫漲做莊</strong>。
-                    </p>
-                </li>
-                <li>賣權熊市 (Bear Put Spread) ：
-                    <p>
-                        買進較高履約價的 Put ，同時賣出較低履約價的 Put ，用於看跌市場並降低成本。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤會下跌至 22500 左右<br>
-                        <strong>買進履約價 23000 的 Put + 賣出履約價 22500 的 Put</strong><br>
-                        這個組合單會在大盤結算點數低於 22500 時獲得最大獲利。<br>
-                        最大損失則會在大盤結算點數高於 23000 時發生。
-                        這個類組合單也叫做<strong>溫跌</strong>。
-                    </p>
-                </li>
-                <li>買進跨式 (Long Straddle) ：
-                    <p>
-                        同時買進相同履約價與到期日的買權和賣權，預期市場將有劇烈波動。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤將會有大幅波動，但不確定是向上還是向下。<br>
-                        <strong>買進履約價 23000 的 Call + 買進履約價 23000 的 Put 一共花費 500 點權利金</strong><br>
-                        這樣的策略能夠在大盤結算時產生大幅波動時賺取獲利。<br>
-                        如果大盤結算點數遠離 23000 超過 500 點時，將會開始獲利。<br>
-                        具體操作方式常會搭配相同結算日的台指期貨進行鎖定獲利。
-                    </p>
-                </li>
-                <li>買進勒式 (Long Strangle) ：
-                    <p>
-                        同時買進不同履約價但相同到期日的買權和賣權，也適用於市場大幅波動，但成本低於跨式。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤會有大幅波動，並預計波動範圍會超過 22800 到 23200 之間。<br>
-                        <strong>買進履約價 22800 的 Put + 買進履約價 23200 的 Call 一共花費 400 點權利金</strong><br>
-                        這樣的組合能夠在大盤結算點數超過 23600 或跌破 22400 時賺取獲利，成本低於跨式。<br>
-                        需要注意的是賺取的點數是否能和支付出去的權利金打平<br> 
-                        並且 Long Strangle 比 Long Straddle 要求更大的波動
-                    </p>
-                </li>
-                <li>賣出跨式 (Short Straddle) ：
-                    <p>
-                        同時賣出相同履約價與到期日的買權和賣權，適用於市場將保持穩定時賺取權利金。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤將保持穩定，波動不大。<br>
-                        <strong>賣出履約價 23000 的 Call + 賣出履約價 23000 的 Put</strong><br>
-                        這樣的策略能夠在大盤結算在 23000 附近時賺取權利金，若市場波動過大則可能損失。
-                    </p>
-                </li>
-                <li>賣出勒式 (Short Strangle) ：
-                    <p>
-                        同時賣出不同履約價但相同到期日的買權和賣權，因為賣出的是價外期權，權利金收入較跨式低，但風險也相對分散。<br>
-                    </p>    
-                    *舉例 :<br>
-                    <p>
-                        假設我認為大盤會保持穩定，預期不會超過 22800 或跌破 23200。<br>
-                        <strong>賣出履約價 22800 的 Put + 賣出履約價 23200 的 Call</strong><br>
-                        這樣的策略能夠賺取相對較低的權利金，並且風險也相對分散。
-                    </p>
-                </li>
-            </ul>
-            <h3>只有賣方複式單需要支付保證金，分別是：</h3>
-            <ul>
-                <li>Bear Call Spread , Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
-                <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
-            </ul>
-        </div>
-        <div class="adsense">
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
-                 crossorigin="anonymous"></script>
-            <!-- content-rectangle-1 -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-6002813508124164"
-                 data-ad-slot="3044871900"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
+        <div class="opknows_mid">
+            <h1>如何計算選擇權保證金?</h1>
+            <!-- 裸賣選擇權 -->
+            <div class="text-block">
+                <h2>裸賣選擇權</h2>
+                <p>
+                    裸賣選擇權的保證金計算是根據期權的市場價格、期權的執行價格與標的資產的波動性來計算的。對於台指選擇權，裸賣期權的保證金額度會受到以下因素影響：
+                </p>
+                <ul>
+                    <li>價外值 ( Out-of-the-Money Value ) ： 標的資產價格與期權執行價格之間的差距。</li>
+                    <li>權利金市值 ( Option Premium Market Value ) ： 期權在市場上的交易價格，包括內在價值和時間價值。</li>
+                    <li>A值  ( A-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
+                    <li>B值  ( B-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
+                    <li>C值  ( C-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
+                </ul>
+                <p>
+                    一般來說，裸賣選擇權的保證金計算公式為：<strong>權利金市值 + Max( A值 - 價外值，B值 )</strong>
+                </p>
+                <p>
+                    需要注意的是<br>
+                    履約價為價外 500點 ~ 1000點 保證金 A、B 值都會加收 20％<br>
+                    履約價超過價外 1000點 保證金 A、B 值都會加收 50％<br>
+                    因此在進行留倉的時候需要留意這部分，避免不慎被強制平倉影響策略的進行。<br>
+                    具體的計算方式可能會隨著不同期權的波動性以及市場情況而調整，請以官方公告為準。
+                </p>
+            </div>
+            <!-- 複式單 -->
+            <div class="text-block">
+                <h2>複式單</h2>
+                <ul>
+                    <li>買權牛市 (Bull Call Spread) ： 
+                        <p>
+                            買進較低履約價的 Call，同時賣出較高履約價的 Call，用以降低成本。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤在結算時會比 23000 高，但又不會超過 23100 時<br>
+                            <strong>買進履約價 23000 的 Call + 賣出履約價 23100 Call</strong><br>
+                            就能形成價差 100 點的 Bull Call Spread 組合單，而這個組合單在大盤結算點數超過 23100 時達到最大獲利，<br>
+                            最大損失發生在大盤結算在 23000 以下。<br>
+                            這個類組合單也叫做<strong>溫漲</strong>。
+                        </p>
+                    </li>
+                    <li>買權熊市 (Bear Call Spread) ：
+                        <p>
+                            賣出較低履約價的 Call ，同時買進較高履約價的 Call，用以限制風險。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤在結算時會比 23000 低，但又不至於大跌時<br>
+                            <strong>賣出履約價 23000 Call + 買進 23100 Call</strong><br>
+                            就能形成價差 100 點的 Bear Call Spread 組合單，而這個組合單在大盤結算點數低於 23000 時達到最大獲利。<br>
+                            最大損失發生在大盤結算在 23100 以上。<br>
+                            這個類組合單也叫做<strong>溫跌做莊</strong>。
+                        </p>
+                    </li>
+                    <li>賣權牛市 (Bull Put Spread) ：
+                        <p>
+                            賣出較高履約價的 Put ，同時買進較低履約價的 Put ，適用於看不跌市場。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤會維持在 23000 以上時<br>
+                            <strong>賣出履約價 23000 的 Put + 買進履約價 22900 的 Put</strong><br>
+                            這樣的組合單最大獲利會在大盤結算點數高於 23000 時達成，並且會收取權利金。<br>
+                            最大損失發生在大盤結算在 22900 以下。
+                            這個類組合單也叫做<strong>溫漲做莊</strong>。
+                        </p>
+                    </li>
+                    <li>賣權熊市 (Bear Put Spread) ：
+                        <p>
+                            買進較高履約價的 Put ，同時賣出較低履約價的 Put ，用於看跌市場並降低成本。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤會下跌至 22500 左右<br>
+                            <strong>買進履約價 23000 的 Put + 賣出履約價 22500 的 Put</strong><br>
+                            這個組合單會在大盤結算點數低於 22500 時獲得最大獲利。<br>
+                            最大損失則會在大盤結算點數高於 23000 時發生。
+                            這個類組合單也叫做<strong>溫跌</strong>。
+                        </p>
+                    </li>
+                    <li>買進跨式 (Long Straddle) ：
+                        <p>
+                            同時買進相同履約價與到期日的買權和賣權，預期市場將有劇烈波動。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤將會有大幅波動，但不確定是向上還是向下。<br>
+                            <strong>買進履約價 23000 的 Call + 買進履約價 23000 的 Put 一共花費 500 點權利金</strong><br>
+                            這樣的策略能夠在大盤結算時產生大幅波動時賺取獲利。<br>
+                            如果大盤結算點數遠離 23000 超過 500 點時，將會開始獲利。<br>
+                            具體操作方式常會搭配相同結算日的台指期貨進行鎖定獲利。
+                        </p>
+                    </li>
+                    <li>買進勒式 (Long Strangle) ：
+                        <p>
+                            同時買進不同履約價但相同到期日的買權和賣權，也適用於市場大幅波動，但成本低於跨式。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤會有大幅波動，並預計波動範圍會超過 22800 到 23200 之間。<br>
+                            <strong>買進履約價 22800 的 Put + 買進履約價 23200 的 Call 一共花費 400 點權利金</strong><br>
+                            這樣的組合能夠在大盤結算點數超過 23600 或跌破 22400 時賺取獲利，成本低於跨式。<br>
+                            需要注意的是賺取的點數是否能和支付出去的權利金打平<br> 
+                            並且 Long Strangle 比 Long Straddle 要求更大的波動
+                        </p>
+                    </li>
+                    <li>賣出跨式 (Short Straddle) ：
+                        <p>
+                            同時賣出相同履約價與到期日的買權和賣權，適用於市場將保持穩定時賺取權利金。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤將保持穩定，波動不大。<br>
+                            <strong>賣出履約價 23000 的 Call + 賣出履約價 23000 的 Put</strong><br>
+                            這樣的策略能夠在大盤結算在 23000 附近時賺取權利金，若市場波動過大則可能損失。
+                        </p>
+                    </li>
+                    <li>賣出勒式 (Short Strangle) ：
+                        <p>
+                            同時賣出不同履約價但相同到期日的買權和賣權，因為賣出的是價外期權，權利金收入較跨式低，但風險也相對分散。<br>
+                        </p>    
+                        *舉例 :<br>
+                        <p>
+                            假設我認為大盤會保持穩定，預期不會超過 22800 或跌破 23200。<br>
+                            <strong>賣出履約價 22800 的 Put + 賣出履約價 23200 的 Call</strong><br>
+                            這樣的策略能夠賺取相對較低的權利金，並且風險也相對分散。
+                        </p>
+                    </li>
+                </ul>
+                <h3>只有賣方複式單需要支付保證金，分別是：</h3>
+                <ul>
+                    <li>Bear Call Spread , Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
+                    <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
+                </ul>
+            </div>
+            <div class="adsense">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- content-rectangle-1 -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="3044871900"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
 
-        <div class="text-block">
-            <h2>計算機使用之參數</h2>
-            <p>
-                資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br>
-            </p>
-            <ul>
-                <li>契約乘數：<strong><span id="contractMultiplier"></span></strong></li>
-            </ul>
-            <ul>
-                <li>原始保證金 - 小台指期保證金：<strong><span id="od-miniMargin"></span></strong></li>
-                <li>原始保證金 - A值：<strong><span id="od-AValue"></span></strong></li>
-                <li>原始保證金 - B值：<strong><span id="od-BValue"></span></strong></li>
-                <li>原始保證金 - C值：<strong><span id="od-CValue"></span></strong></li>
-            </ul>
-            <ul>
-                <li>維持保證金 - 小台指期保證金：<strong><span id="mm-miniMargin"></span></strong></li>
-                <li>維持保證金 - A值：<strong><span id="mm-AValue"></span></strong></li>
-                <li>維持保證金 - B值：<strong><span id="mm-BValue"></span></strong></li>
-                <li>維持保證金 - C值：<strong><span id="mm-CValue"></span></strong></li>
-            </ul>
-            <ul>
-                <li>選擇權期交稅率：<strong><span id="opTaxRate"></span></strong></li>
-                <li>期貨期交稅率：<strong><span id="miniTaxRate"></span></strong></li>
-            </ul>
+            <div class="text-block">
+                <h2>計算機使用之參數</h2>
+                <p>
+                    資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br>
+                </p>
+                <ul>
+                    <li>契約乘數：<strong><span id="contractMultiplier"></span></strong></li>
+                </ul>
+                <ul>
+                    <li>原始保證金 - 小台指期保證金：<strong><span id="od-miniMargin"></span></strong></li>
+                    <li>原始保證金 - A值：<strong><span id="od-AValue"></span></strong></li>
+                    <li>原始保證金 - B值：<strong><span id="od-BValue"></span></strong></li>
+                    <li>原始保證金 - C值：<strong><span id="od-CValue"></span></strong></li>
+                </ul>
+                <ul>
+                    <li>維持保證金 - 小台指期保證金：<strong><span id="mm-miniMargin"></span></strong></li>
+                    <li>維持保證金 - A值：<strong><span id="mm-AValue"></span></strong></li>
+                    <li>維持保證金 - B值：<strong><span id="mm-BValue"></span></strong></li>
+                    <li>維持保證金 - C值：<strong><span id="mm-CValue"></span></strong></li>
+                </ul>
+                <ul>
+                    <li>選擇權期交稅率：<strong><span id="opTaxRate"></span></strong></li>
+                    <li>期貨期交稅率：<strong><span id="miniTaxRate"></span></strong></li>
+                </ul>
+            </div>
         </div>
+        <div class="opknows_right">
+            <div>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6002813508124164"
+                     crossorigin="anonymous"></script>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
         <div class="donate-block">
             <div>
                 <a href="https://p.ecpay.com.tw/5F8984E" target="_blank" rel="noopener noreferrer" id="bmc">

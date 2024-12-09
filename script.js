@@ -302,7 +302,7 @@ window.updatefloatingChart = function () {
     
     if (chartRect.bottom < 0) {
         // 計算小圖的寬高
-        const ratio = 2;
+        const ratio = 2.4;
         // 更新浮動圖
         floatingChart.css({
             width: `${chartDom.offsetWidth / ratio}px`,
@@ -316,7 +316,7 @@ window.updatefloatingChart = function () {
             floatingChart.attr('src', lastChartImage);
         }
         floatingChart.css('visibility', 'visible');
-        floatingChart.stop().animate({ opacity: 0.9 },300);
+        floatingChart.stop().animate({ opacity: 0.95 },300);
         chartRectChanged = false;
     } else {
         floatingChart.stop().animate({ opacity: 0 },300,
@@ -756,7 +756,7 @@ window.initChart = function () {
     chart.setOption({
         title: { text: '最終結算損益線圖' },
         tooltip: { trigger: 'axis' },
-        xAxis: { type: 'value', name: '標的價格' },
+        xAxis: { type: 'value' },
         yAxis: { type: 'value', name: '損益' },
         series: [{ type: 'line', data: [] }]
     });
@@ -1065,7 +1065,6 @@ window.updateChart = function () {
 
                 gridIndex: 0, 
                 type: 'value',
-                name: '最終收盤價格',
                 nameTextStyle: {
                     color: nightModeColors.textColor // X 軸名稱顏色
                 },

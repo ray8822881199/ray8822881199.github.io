@@ -45,19 +45,20 @@ button:active {
 }
 
 #opknows {
-    display: block;
+    display: flex;
     color: #ddd;
     line-height: 1.4rem;
+    margin: 30px 0px;
 }
 #opknows h2,
 #opknows strong,
 #opknows .text-block a{
     color: #fff;
 }
-#opknows>div {
+#opknows>div>div {
     background-color: #1e1e1e; /* 深色背景 */
     padding: 10px 20px;
-    margin: 30px 0px;
+    margin: 15px 0px;
 }
 #opknows li{
     margin: 0 0 30px 0;
@@ -83,6 +84,28 @@ button:active {
     width: 100%;
 }
 
+.bottom {
+    display: block;
+    color: #ddd;
+    line-height: 1.4rem;
+}
+.bottom>div {
+    background-color: #1e1e1e; 
+    padding: 10px 20px;
+    margin: 30px 0px;
+}
+.opknows_left {
+    width: 250px;
+    margin: 0 10px 0 0;
+}
+.opknows_mid {
+    width: calc(100vw - 500px);
+    margin: 0 10px 0 0;
+}
+.opknows_right {
+    width: 250px;
+}
+
 
 /* 外層容器 */
 .trade-builder,.container {
@@ -95,7 +118,7 @@ button:active {
     background-color: #1e1e1e;
 }
 .container {
-    width: calc(100vw - 250px);
+    width: calc(100vw - 500px);
 }
 .right {
     width: 250px;
@@ -197,7 +220,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .back-to-top {
     position: fixed; 
     bottom: 17px; 
-    right: 17px; 
+    right: 268px; 
     width: 50px; 
     height: 50px; 
     z-index: 1000; 
@@ -390,15 +413,35 @@ input[type="checkbox"]:hover {
     .positions-container {
         overflow-x: scroll;
     }
+    #opknows{
+        display: block;
+    }
     #opknows>div {
         padding: 0px;
     }
     #opknows li>p {
         margin: 0 10px;
     }
+    .opknows_left {
+        width: 100%;
+        margin: 0;
+    }
+    .opknows_mid {
+        width: 100%;
+        margin: 0;
+    }
+    .opknows_right {
+        display: none;
+    }
+    
+
     #main_config span {
         display: block;
         margin: 5px 0;
     }
     #main_config br {display: none;}
+
+    .back-to-top {
+        right: 17px;
+    }
 }
