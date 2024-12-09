@@ -441,6 +441,9 @@ input[type="checkbox"]:hover {
     }
     #main_config br {display: none;}
 
+    #floating-chart{
+        right: 17px;
+    }
     .back-to-top {
         right: 17px;
     }
