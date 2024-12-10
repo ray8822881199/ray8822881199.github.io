@@ -105,6 +105,9 @@ button:active {
 .opknows_right {
     width: 250px;
 }
+.opknows_right>div {
+    height: 620px;
+}
 
 
 /* 外層容器 */
