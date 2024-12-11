@@ -13,7 +13,7 @@ window.positions = []; // 存放所有持倉數據
 
 window.contractMultiplier=50; // 每點價值
 
-window.dataDate = new Date('2024-11-11'); // 資料更新日期
+window.dataDate = new Date('2024-12-11'); // 資料更新日期
 window.underlyingPrice = 23000; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
@@ -965,10 +965,10 @@ window.updateChart = function () {
         titleTextColor: '#dcdcdc',  // 標題文字顏色
         seriesColors: {
             position: 'cyan',       // 持倉線顏色
-            applied: 'orange',      // 套用後線顏色
-            test: 'red',            // 測試倉線顏色
-            od: '#B766AD',          // 原始保證金線顏色
-            mm: '#B766AD',          // 維持保證金線顏色
+            applied: '#FFCC22',      // 套用後線顏色
+            test: ' #FF3333',            // 測試倉線顏色
+            od: '#E93EFF',          // 原始保證金線顏色
+            mm: '#E93EFF',          // 維持保證金線顏色
         },
         tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
         tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色

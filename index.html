@@ -33,8 +33,8 @@
             <div class="description">
                 <p>
                     <strong>
-                        本選擇權計算機專為策略型交易者設計，結合保證金試算與損益試算功能，幫助您快速掌握期貨與選擇權交易中最關鍵的資金需求。<br>
-                        透過視覺化線圖，清楚呈現複雜持倉下的保證金變化與損益狀況，讓您對每筆策略的潛在風險與報酬一目了然。<br>
+                        本選擇權計算機專為策略型交易者設計，結合保證金試算與損益試算功能，幫助你快速掌握期貨與選擇權交易中最關鍵的資金需求。<br>
+                        透過視覺化線圖，清楚呈現複雜持倉下的保證金變化與損益狀況，讓你對每筆策略的潛在風險與報酬一目了然。<br>
                         特別適合追求資金效率極限的高階交易者，能有效降低因保證金不足導致的斷頭風險，同時提升操作的穩定性與信心。<br>
                         <br>
                         基本操作：<br>
@@ -50,7 +50,7 @@
                 警語：<br>
                 1.期貨交易具有一定風險，交易人應先評估本身資金及所能擔負之風險，過去績效或未來預期的表現不可作為日後績效之保證。<br>
                 2.實際可交易商品相關資訊請以主管機關公告為限。<br>
-                3.本計算機所示資料僅供參考，計算方式紀錄於網頁下方，實際計算方式請以主管機關公告為準。<br>
+                3.本計算機所示資料僅供參考，計算參數紀錄於<a class="scroll-link" href="#calc_para">網頁下方</a>，實際計算方式請以主管機關公告為準。<br>
             </div>
             <div class="adsense">
                 <!-- content-rectangle-1 -->
@@ -158,11 +158,12 @@
                 <label for="precision">精細度</label><br>
                 <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200" style="width: calc(100% - 16px);"/>
             </span>
+            <div id="prime_location" style="background-color: #333;height: 450px;padding: 5px;margin: 5px;">閒置區塊</div>
         </div>
     </div>
     <div id="opknows">
         <div class="opknows_left">
-            <div> - </div>
+            <div> - 閒置區塊 - </div>
         </div>
         <div class="opknows_mid">
             <h1>如何計算選擇權保證金?</h1>
@@ -311,8 +312,7 @@
                      (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
             </div>
-
-            <div class="text-block">
+            <div id="calc_para" class="text-block">
                 <h2>計算機使用之參數</h2>
                 <p>
                     資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br>

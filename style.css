@@ -44,6 +44,11 @@ button:active {
     transform: scale(0.98);    /* 按下時縮小一點 */
 }
 
+.scroll-link {
+    color: #00b894; /* 醒目的綠色連結 */
+    text-decoration: none; /* 移除底線 */
+}
+
 #opknows {
     display: flex;
     color: #ddd;
