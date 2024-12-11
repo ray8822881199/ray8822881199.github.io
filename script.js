@@ -959,7 +959,7 @@ window.updateChart = function () {
     const nightModeColors = {
         backgroundColor: '#2c343c', // 背景色
         textColor: '#dcdcdc',       // 通用文字顏色
-        axisLineColor: '#888',      // 軸線顏色
+        axisLineColor: '#dcdcdc',      // 軸線顏色
         gridColor: '#555',          // 網格線顏色
         legendTextColor: '#dcdcdc', // 圖例文字顏色
         titleTextColor: '#dcdcdc',  // 標題文字顏色

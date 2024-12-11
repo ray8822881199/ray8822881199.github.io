@@ -43,6 +43,8 @@
                         3. 分組中輸入相同文字代表互為組合單，保證金的計算會優先參考。（只允許組合兩個部位）<br>
                         4. 請自行輸入手續費基數，系統會參考此基數進行費用試算。<br>
                         5. <a class="scroll-link" href="#bmc">請平方喝杯咖啡</a><br>
+                        <br>
+                        如果在靜態功能上有甚麼願望，也歡迎<a class="scroll-link" href="footer">寄許願信給平方</a><br>
                     </strong>
                 </p>
             </div>
@@ -181,7 +183,7 @@
                     <li>C值  ( C-Value ) ： 期貨交易所設定的固定參數，用於保證金計算。</li>
                 </ul>
                 <p>
-                    一般來說，裸賣選擇權的保證金計算公式為：<strong>權利金市值 + Max( A值 - 價外值，B值 )</strong>
+                    一般來說，裸賣選擇權的保證金計算公式為：<strong>權利金市值 + Max( A值 - 價外值, B值 )</strong>
                 </p>
                 <p>
                     需要注意的是<br>
@@ -299,7 +301,7 @@
                 <h3>只有賣方複式單需要支付保證金，分別是：</h3>
                 <ul>
                     <li>Bear Call Spread , Bull Put Spread ： <strong>( 較高履約價 - 較低履約價 ) * 契約乘數</strong></li>
-                    <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金，裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
+                    <li>Short Straddle , Short Strangle ： <strong>Max( 裸賣Call之保證金, 裸賣Put之保證金 ) + 保證金較低方之權利金市值 + C值</strong></li>
                 </ul>
             </div>
             <div class="adsense">
