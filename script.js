@@ -65,7 +65,7 @@ const chart = echarts.init(chartDom);
 let lastChartImage = '';
 let chartRectChanged = false;
 const floatingChart = $('#floating-chart');
-const btt = $('.back-to-top')
+const btt = $('.back-to-top');
 
 const positionOptions = [
     { id: 'long_mini', text: '小台多單' },
@@ -275,6 +275,40 @@ $(document).ready(function () {
         updateChart();
     });
 
+    // 匯出 Url
+    $('#exportUrl').off('click').on('click', function(e){
+        // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
+        const processedPositions = positions.map(position => {
+            const status = getStatus(position); // 生成 status 整數
+            return {
+                status: status,
+                strikePrice: position.strikePrice,
+                cost: position.cost,
+                quantity: position.quantity,
+                closeAmount: position.closeAmount,
+                groupId: position.groupId
+            };
+        });
+
+        // 將處理後的 JSON 陣列轉換為字串
+        const jsonString = JSON.stringify(processedPositions).replace(/\s+/g, '');
+        
+        // Gzip 壓縮
+        const compressed = pako.gzip(jsonString);
+        
+        // 轉換為 Base64 編碼
+        const base64Compressed = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed)));
+        
+        const preUrl = window.location.origin + window.location.pathname;
+        const url = `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
+        console.log(url);
+    });
+
+    
+    
+    
+    getUrlPosi();
+
     initChart();
     updateOptionTable();
     updateChart();
@@ -282,7 +316,65 @@ $(document).ready(function () {
 });
 
 
+// 檢查網址有無持倉資料
+window.getUrlPosi = function() {
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedJson = urlParams.get('data');
+    if (encodedJson) {
+        // 解碼 Base64 字串
+        let byteArray = Uint8Array.from(atob(decodeURIComponent(encodedJson)), c => c.charCodeAt(0));
+        
+        // 使用 Pako 解壓縮
+        let decompressed = pako.ungzip(byteArray, { to: 'string' });
+        let positionJson = JSON.parse(decompressed).map(position => {
+            const status = position.status;
+            const type = getTypeFromStatus(status);
+            return {
+                type: type,
+                strikePrice: position.strikePrice,
+                cost: position.cost,
+                quantity: position.quantity,
+                closeAmount: position.closeAmount,
+                groupId: position.groupId,
+                istest: (status & 1) !== 0,
+                isactive: (status & 2) !== 0,
+                isclosed: (status & 4) !== 0
+            };
+        });
+
+        // 處理解壓縮後的 JSON，還原 status 為對應的 type, istest, isactive, isclosed
+        processImportedJSON(positionJson);
+        console.log(positions);
+    }
+};
+
+
+// 根據 status 值還原對應的 type
+window.getTypeFromStatus = function (status) {
+    const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put"];
+    const typeIndex = (status>>3) & 0b111;  // 取出前 3 位，對應於 type
+    return typeMap[typeIndex] || "long_mini";
+};
+
+window.getStatus = function (position) {
+    const typeMap = {
+        "long_mini": 0,
+        "short_mini": 1,
+        "buy_call": 2,
+        "sell_call": 3,
+        "buy_put": 4,
+        "sell_put": 5
+    };
+
+    // 計算 status 的整數值
+    const typeValue = (typeMap[position.type]<<3) || 0;
+    const istestValue = position.istest ? 1 : 0;
+    const isactiveValue = position.isactive ? 2 : 0;
+    const isclosedValue = position.isclosed ? 4 : 0;
+
+    return typeValue + istestValue + isactiveValue + isclosedValue;
+};
 
 
 window.updatefloatingChart = function () {
@@ -427,7 +519,7 @@ window.calculateOptionMargin = function (strikePrice, optionType, positionType, 
     }
 };
 
-window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuantity, istest=1, isactive=1, isclosed=0) {
+window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuantity, istest=1, isactive=1, isclosed=0, closeCost=0) {
     const positionId = Math.max(
         ...$('tr[data-id]').map(function () {
             return Number($(this).data('id'));
@@ -497,6 +589,9 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
     }
     if (itemQuantity) {
         row.find('.quantity').val(itemQuantity); 
+    }
+    if (closeCost) {
+        row.find('.close-amount').val(closeCost); 
     }
 
     // 以是否測試為主，是否關閉要配合是否測試，這樣衝突時在畫面上才看的出來
@@ -633,7 +728,7 @@ window.processImportedJSON = function (jsonArray) {
             const groupId = item.groupId || ''; 
             const cost = item.cost || 0;
             // 建立持倉
-            window.addItem(item.type, item.strikePrice, item.groupId, item.cost, item.quantity, item.istest, item.isactive, item.isclosed);
+            window.addItem(item.type, item.strikePrice, item.groupId, item.cost, item.quantity, item.istest, item.isactive, item.isclosed, item.closeAmount);
         } else {
             console.warn("缺少必要屬性的項目", item);
         }
