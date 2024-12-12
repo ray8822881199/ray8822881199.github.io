@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="選擇權持倉損益計算機，視覺化持倉損益情形，並支持保證金試算功能。一個完整的策略常常需要靈活的持倉變化，當部位一多就不容易計算最終損益表現，選擇權計算機就是為了解決這種問題而製作的工具。">
-    <meta name="keywords" content="選擇權, 保證金, 保證金計算, 選擇權工具, 台指選擇權, 持倉試算, 選擇權計算機, 選擇權持倉試算">
+    <meta name="description" content="輸入持倉資料，自動計算並生成保證金線圖、損益表現線圖，並估算期交稅與手續費，協助交易者掌握交易成本與風險。">
+    <meta name="keywords" content="選擇權, 保證金, 選擇權工具, 台指選擇權, 持倉試算, 選擇權計算機, 選擇權持倉試算, 損益表現, 保證金線圖, 期交稅, 手續費, 選擇權損益計算">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-6002813508124164">
     <meta name="robots" content="index, follow">
@@ -24,10 +24,10 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MCP2Q4RN"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <header>
-        <h1>一平方的選擇權計算機</h1>
+    <header class="site-header">
+        <h1 title="選擇權計算機">一平方的選擇權計算機</h1>
     </header>
-    
+
     <div>
         <div id="top-container">
             <div class="description">
@@ -67,7 +67,7 @@
             </div>
         </div>
     </div>
-    <div>
+    <div class="main_view">
         <div class="trade-builder">
             <table id="optionTable">
                 <thead>
@@ -166,6 +166,8 @@
     </div>
     <div id="opknows">
         <div class="opknows_left">
+            <div> - 閒置區塊 - </div>
+            <div> - 閒置區塊 - </div>
             <div> - 閒置區塊 - </div>
         </div>
         <div class="opknows_mid">

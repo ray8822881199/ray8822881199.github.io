@@ -408,19 +408,24 @@ input[type="checkbox"]:hover {
 
 /* 直式螢幕 */
 @media (max-aspect-ratio: 1/1) {
+    .main_view {
+        display: block;
+    }
     .overall_config {
         width: 96%;
     }
-    .trade-builder, .right {
+    .trade-builder {
         display: none;
     }
-    .container {
+    .container, .right {
         width: 100%;
         margin: 0;
     }
     .positions-container {
         overflow-x: scroll;
     }
+
+
     #opknows{
         display: block;
     }
