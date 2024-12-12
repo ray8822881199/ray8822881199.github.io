@@ -43,6 +43,18 @@ window.marginInfo={
     }
 };
 
+// 限制資料位元數 小數部分只取一位 其餘失真
+window.jsonDataLength = {
+    type: 3, // 資料 < 8
+    istest: 1,
+    isactive: 1,
+    isclosed: 1,
+    strikePrice: 16, // 資料 < 65536
+    quantity: 10, // 資料 < 1024
+    cost: 16, // 資料*10 < 65536
+    closeAmount: 16 // 資料*10 < 65536
+};
+
 // 設定 HTML 元素的內容
 $("#dataGetDate").text(window.dataDate.toISOString().split('T')[0]);
 $("#contractMultiplier").text(window.contractMultiplier);
@@ -279,14 +291,10 @@ $(document).ready(function () {
     $('#exportUrl').off('click').on('click', function(e){
         // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
         const processedPositions = positions.map(position => {
-            const status = getStatus(position); // 生成 status 整數
+            const binData = getBinFromData(position); // 將所有數字進行二進位編制
             return {
-                status: status,
-                strikePrice: position.strikePrice,
-                cost: position.cost,
-                quantity: position.quantity,
-                closeAmount: position.closeAmount,
-                groupId: position.groupId
+                b: binData,
+                t: position.groupId
             };
         });
 
@@ -327,37 +335,50 @@ window.getUrlPosi = function() {
         
         // 使用 Pako 解壓縮
         let decompressed = pako.ungzip(byteArray, { to: 'string' });
-        let positionJson = JSON.parse(decompressed).map(position => {
-            const status = position.status;
-            const type = getTypeFromStatus(status);
-            return {
-                type: type,
-                strikePrice: position.strikePrice,
-                cost: position.cost,
-                quantity: position.quantity,
-                closeAmount: position.closeAmount,
-                groupId: position.groupId,
-                istest: (status & 1) !== 0,
-                isactive: (status & 2) !== 0,
-                isclosed: (status & 4) !== 0
-            };
+        console.log(decompressed);
+        let positionJson = JSON.parse(decompressed).map(p => {
+            return getDataFromBin(p);
         });
 
-        // 處理解壓縮後的 JSON，還原 status 為對應的 type, istest, isactive, isclosed
         processImportedJSON(positionJson);
-        console.log(positions);
     }
 };
 
+window.getDataFromBin = function (p) {
 
-// 根據 status 值還原對應的 type
-window.getTypeFromStatus = function (status) {
     const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put"];
-    const typeIndex = (status>>3) & 0b111;  // 取出前 3 位，對應於 type
-    return typeMap[typeIndex] || "long_mini";
+    const d = convertBase36to10(p.b);
+
+    console.log(d);
+
+    let shift = 0;
+
+    // 解析數據
+    function extractBits(data, length) {
+        const mask = (1 << length) - 1;
+        const value = (data >> BigInt(shift)) & BigInt(mask);
+        shift += length;
+        return Number(value);
+    }
+
+    let position = {};
+    // 嚴格要求反向執行
+    position.closeAmount = extractBits(d, jsonDataLength.closeAmount) / 10; // 還原小數
+    position.cost = extractBits(d, jsonDataLength.cost) / 10; // 還原小數
+    position.quantity = extractBits(d, jsonDataLength.quantity);
+    position.strikePrice = extractBits(d, jsonDataLength.strikePrice);
+    position.isclosed = extractBits(d, jsonDataLength.isclosed) === 1;
+    position.isactive = extractBits(d, jsonDataLength.isactive) === 1;
+    position.istest = extractBits(d, jsonDataLength.istest) === 1;
+    position.type = typeMap[extractBits(d, jsonDataLength.type)];
+
+    position.groupId = p.t;
+
+    return position;
 };
 
-window.getStatus = function (position) {
+window.getBinFromData = function (position) {
+
     const typeMap = {
         "long_mini": 0,
         "short_mini": 1,
@@ -367,14 +388,36 @@ window.getStatus = function (position) {
         "sell_put": 5
     };
 
-    // 計算 status 的整數值
-    const typeValue = (typeMap[position.type]<<3) || 0;
-    const istestValue = position.istest ? 1 : 0;
-    const isactiveValue = position.isactive ? 2 : 0;
-    const isclosedValue = position.isclosed ? 4 : 0;
+    let combined = 0n;
 
-    return typeValue + istestValue + isactiveValue + isclosedValue;
+    // 將數據壓縮為二進位
+    function appendBits(value, length) {
+        combined = (combined << BigInt(length)) | BigInt(value);
+    }
+    // 嚴格要求此處執行順序 解碼時嚴格要求反向執行
+    appendBits(typeMap[position.type], jsonDataLength.type);
+    appendBits(position.istest ? 1 : 0, jsonDataLength.istest);
+    appendBits(position.isactive ? 1 : 0, jsonDataLength.isactive);
+    appendBits(position.isclosed ? 1 : 0, jsonDataLength.isclosed);
+    appendBits(position.strikePrice, jsonDataLength.strikePrice);
+    appendBits(position.quantity, jsonDataLength.quantity);
+    appendBits(Math.floor(position.cost * 10), jsonDataLength.cost); // 放大小數
+    appendBits(Math.floor(position.closeAmount * 10), jsonDataLength.closeAmount); // 放大小數 
+    console.log(combined.toString(10));
+    return combined.toString(36);
+
 };
+
+window.convertBase36to10 = function (data) {
+  const charSet = '0123456789abcdefghijklmnopqrstuvwxyz'; // 36進制字符集
+
+  let decimalValue = BigInt(0); // 初始為 0，並使用 BigInt 處理大數
+  for (let i = 0; i < data.length; i++) {
+    let charValue = charSet.indexOf(data[i].toLowerCase());
+    decimalValue = decimalValue * BigInt(36) + BigInt(charValue);
+  }
+  return decimalValue;
+}
 
 
 window.updatefloatingChart = function () {
