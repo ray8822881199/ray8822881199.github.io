@@ -349,10 +349,7 @@ window.getDataFromBin = function (p) {
     const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put"];
     const d = convertBase36to10(p.b);
 
-    console.log(d);
-
     let shift = 0;
-
     // 解析數據
     function extractBits(data, length) {
         const mask = (1 << length) - 1;
@@ -360,7 +357,6 @@ window.getDataFromBin = function (p) {
         shift += length;
         return Number(value);
     }
-
     let position = {};
     // 嚴格要求反向執行
     position.closeAmount = extractBits(d, jsonDataLength.closeAmount) / 10; // 還原小數
@@ -371,9 +367,7 @@ window.getDataFromBin = function (p) {
     position.isactive = extractBits(d, jsonDataLength.isactive) === 1;
     position.istest = extractBits(d, jsonDataLength.istest) === 1;
     position.type = typeMap[extractBits(d, jsonDataLength.type)];
-
     position.groupId = p.t;
-
     return position;
 };
 
@@ -403,7 +397,6 @@ window.getBinFromData = function (position) {
     appendBits(position.quantity, jsonDataLength.quantity);
     appendBits(Math.floor(position.cost * 10), jsonDataLength.cost); // 放大小數
     appendBits(Math.floor(position.closeAmount * 10), jsonDataLength.closeAmount); // 放大小數 
-    console.log(combined.toString(10));
     return combined.toString(36);
 
 };
