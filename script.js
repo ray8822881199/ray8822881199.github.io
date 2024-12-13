@@ -288,7 +288,7 @@ $(document).ready(function () {
     });
 
     // 匯出 Url
-    $('#exportUrl').off('click').on('click', function(e){
+    $('#ShareThis').off('click').on('click', function(e){
         // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
         const processedPositions = positions.map(position => {
             const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
@@ -311,7 +311,22 @@ $(document).ready(function () {
         const url = `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
         console.log(url);
 
+        // 更新 Meta 標籤
+        const metaTags = [
+            { property: 'og:url', content: url },
+            { property: 'og:image', content: chart.getDataURL({backgroundColor: '#000'}) }
+        ];
 
+        metaTags.forEach(tag => {
+            let metaTag = document.querySelector(`meta[property="${tag.property}"]`);
+            if (!metaTag) {
+                metaTag = document.createElement('meta');
+                metaTag.setAttribute('property', tag.property);
+                document.head.appendChild(metaTag);
+            }
+            metaTag.setAttribute('content', tag.content);
+        });
+        
     });
 
     
