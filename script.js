@@ -49,10 +49,10 @@ window.jsonDataLength = {
     istest: 1,
     isactive: 1,
     isclosed: 1,
-    strikePrice: 16, // 資料 < 65536
-    quantity: 10, // 資料 < 1024
-    cost: 16, // 資料*10 < 65536
-    closeAmount: 16 // 資料*10 < 65536
+    strikePrice: 16, // 大盤點位 < 65536
+    quantity: 10, // 持倉口數 < 1024
+    cost: 16, // 成本*10 < 65536
+    closeAmount: 16 // 平倉*10 < 65536
 };
 
 // 設定 HTML 元素的內容
@@ -291,9 +291,9 @@ $(document).ready(function () {
     $('#exportUrl').off('click').on('click', function(e){
         // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
         const processedPositions = positions.map(position => {
-            const binData = getBinFromData(position); // 將所有數字進行二進位編制
+            const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
             return {
-                b: binData,
+                b: base36Data,
                 t: position.groupId
             };
         });
@@ -310,6 +310,8 @@ $(document).ready(function () {
         const preUrl = window.location.origin + window.location.pathname;
         const url = `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
         console.log(url);
+
+
     });
 
     
@@ -335,16 +337,17 @@ window.getUrlPosi = function() {
         
         // 使用 Pako 解壓縮
         let decompressed = pako.ungzip(byteArray, { to: 'string' });
-        console.log(decompressed);
         let positionJson = JSON.parse(decompressed).map(p => {
-            return getDataFromBin(p);
+            return getDataFromBase36(p);
         });
 
         processImportedJSON(positionJson);
+        // 網址清除資料
+        history.replaceState(null, "", window.location.origin + window.location.pathname);
     }
 };
 
-window.getDataFromBin = function (p) {
+window.getDataFromBase36 = function (p) {
 
     const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put"];
     const d = convertBase36to10(p.b);
@@ -371,7 +374,7 @@ window.getDataFromBin = function (p) {
     return position;
 };
 
-window.getBinFromData = function (position) {
+window.getBase36FromData = function (position) {
 
     const typeMap = {
         "long_mini": 0,
