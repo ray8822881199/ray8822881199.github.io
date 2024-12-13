@@ -287,61 +287,38 @@ $(document).ready(function () {
         updateChart();
     });
 
-    // 匯出 Url
-    $('.sharethis-inline-share-buttons>.st-btn').off('click').on('click', function(e){
-        // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
-        const processedPositions = positions.map(position => {
-            const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
-            return {
-                b: base36Data,
-                t: position.groupId
-            };
-        });
 
-        // 將處理後的 JSON 陣列轉換為字串
-        const jsonString = JSON.stringify(processedPositions).replace(/\s+/g, '');
-        
-        // Gzip 壓縮
-        const compressed = pako.gzip(jsonString);
-        
-        // 轉換為 Base64 編碼
-        const base64Compressed = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed)));
-        
-        const preUrl = window.location.origin + window.location.pathname;
-        const url = `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
-        console.log(url);
-
-        // 更新 Meta 標籤
-        const metaTags = [
-            { property: 'og:url', content: url },
-            { property: 'og:image', content: chart.getDataURL({backgroundColor: '#000'}) }
-        ];
-
-        metaTags.forEach(tag => {
-            let metaTag = document.querySelector(`meta[property="${tag.property}"]`);
-            if (!metaTag) {
-                metaTag = document.createElement('meta');
-                metaTag.setAttribute('property', tag.property);
-                document.head.appendChild(metaTag);
-            }
-            metaTag.setAttribute('content', tag.content);
-        });
-        
-        // 網址資料
-        history.replaceState(null, "", url);
-
-    });
-
-    
-    
     
     getUrlPosi();
-
     initChart();
     updateOptionTable();
     updateChart();
 
 });
+
+window.setShareInfo = function() {
+    $('.sharethis-inline-share-buttons')
+            .attr('data-url', getShareUrl())
+            .attr('data-title', '我的持倉分享')
+            .attr('data-description', '這是我的持倉計畫，快來看看！');
+};
+
+window.getShareUrl = function() {
+    const processedPositions = positions.map(position => {
+        const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
+        return {
+            b: base36Data,
+            t: position.groupId
+        };
+    });
+
+    const jsonString = JSON.stringify(processedPositions).replace(/\s+/g, '');
+    const compressed = pako.gzip(jsonString);
+    const base64Compressed = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed)));
+    
+    const preUrl = window.location.origin + window.location.pathname;
+    return `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
+};
 
 
 // 檢查網址有無持倉資料
@@ -955,6 +932,8 @@ window.updateChart = function () {
             }
         }
     }
+
+    setShareInfo();
     
     // 計算測試倉個數
     let testPositionsCount = 0; 
