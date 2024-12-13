@@ -288,7 +288,7 @@ $(document).ready(function () {
     });
 
     // 匯出 Url
-    $('#ShareThis').off('click').on('click', function(e){
+    $('.sharethis-inline-share-buttons>.st-btn').off('click').on('click', function(e){
         // 處理 positions，將 type、istest、isactive、isclosed 轉換為 status，並移除 positionId
         const processedPositions = positions.map(position => {
             const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
