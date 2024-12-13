@@ -299,8 +299,8 @@ $(document).ready(function () {
 window.setShareInfo = function() {
     $('.sharethis-inline-share-buttons')
             .attr('data-url', getShareUrl())
-            .attr('data-title', '我的持倉分享')
-            .attr('data-description', '這是我的持倉計畫，快來看看！');
+            .attr('data-title', `我的持倉規劃： 一共 ${positions.length} 個部位。`)
+            .attr('data-description', '快來看看！');
 };
 
 window.getShareUrl = function() {
