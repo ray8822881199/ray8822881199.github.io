@@ -311,8 +311,25 @@ $(document).ready(function () {
         const url = `${preUrl}?data=${encodeURIComponent(base64Compressed)}`;
         console.log(url);
 
-        history.replaceState(null, "", url);
+        // 更新 Meta 標籤
+        const metaTags = [
+            { property: 'og:url', content: url },
+            { property: 'og:image', content: chart.getDataURL({backgroundColor: '#000'}) }
+        ];
+
+        metaTags.forEach(tag => {
+            let metaTag = document.querySelector(`meta[property="${tag.property}"]`);
+            if (!metaTag) {
+                metaTag = document.createElement('meta');
+                metaTag.setAttribute('property', tag.property);
+                document.head.appendChild(metaTag);
+            }
+            metaTag.setAttribute('content', tag.content);
+        });
         
+        // 網址資料
+        history.replaceState(null, "", url);
+
     });
 
     
