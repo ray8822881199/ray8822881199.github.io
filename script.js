@@ -192,6 +192,7 @@ $(document).ready(function () {
     $(document).on('mousemove touchmove', function (e) {
         if (isBuilding) {
             const { pageX, pageY } = e.type === 'touchmove' ? getTouchEventPosition(e.originalEvent) : e;
+            $('#debug').text(`${pageX+'  '+pageY}`);
             const nowCell = $(document.elementFromPoint(
                 startCell.offset().left - window.scrollX,
                 pageY - window.scrollY
