@@ -355,6 +355,10 @@ $(document).ready(function () {
         updateChart();
     });
 
+    $('#clearPosition').off('click').on('click', function(){
+        $('.remove-btn').trigger('click');
+    });
+
 
     
     getUrlPosi();
