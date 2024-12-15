@@ -70,7 +70,7 @@ $("#opTaxRate").text(window.opTaxRate);
 $("#miniTaxRate").text(window.miniTaxRate);
 
 
-const tradeLine = $('<div class="trade-line"></div>').appendTo('body'); // 建倉拖拉線
+const tradeLine = $('<div class="trade-line" style="z-Index: 100000000;"></div>').appendTo('body'); // 建倉拖拉線
 const chartDom = document.getElementById('chart');
 const chart = echarts.init(chartDom);
 
@@ -172,6 +172,7 @@ $(document).ready(function () {
 
     // mousedown/touchstart
     $('#optionTable').on('mousedown touchstart', 'td.call, td.put', function (e) {
+        e.stopPropagation(); // 防止事件冒泡
         e.preventDefault(); // 防止觸控事件與預設行為（如滾動）衝突
         isBuilding = true;
         startCell = $(this);
@@ -291,7 +292,6 @@ $(document).ready(function () {
             overflowY: 'scroll',
             backgroundColor: '#151515' 
         });
-
         // 固定表格的 thead 樣式
         $('#optionTable>thead').css({
             position: 'sticky',
@@ -375,10 +375,18 @@ window.finishBuild = function() {
 };
 
 window.setShareInfo = function() {
-    $('.sharethis-inline-share-buttons')
+    try {
+        $('.sharethis-inline-share-buttons')
             .attr('data-url', getShareUrl())
             .attr('data-title', `我的持倉規劃： 一共 ${positions.length} 個部位。`)
             .attr('data-description', '快來看看！');
+    } catch (error) {
+        console.log('設定分享資訊時發生錯誤');
+        $('.sharethis-inline-share-buttons')
+            .attr('data-url', window.location.origin + window.location.pathname)
+            .attr('data-title', `我的持倉規劃： 一共 ${positions.length} 個部位。`)
+            .attr('data-description', '快來看看！');
+    }
 };
 
 window.getShareUrl = function() {

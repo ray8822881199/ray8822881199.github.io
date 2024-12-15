@@ -473,7 +473,4 @@ input[type="checkbox"]:hover {
         display: inline;
     }
 
-    #addPosition {
-        display: none;
-    }
 }
