@@ -165,79 +165,147 @@ $(document).ready(function () {
     });
 
 
-    // 建倉表事件 按下
-    $('#optionTable').off('mousedown').on('mousedown', 'td.call, td.put', function (e) {
+    const getTouchEventPosition = (event) => {
+        const touch = event.touches[0] || event.changedTouches[0];
+        return { pageX: touch.pageX, pageY: touch.pageY };
+    };
+
+    // mousedown/touchstart
+    $('#optionTable').on('mousedown touchstart', 'td.call, td.put', function (e) {
+        e.preventDefault(); // 防止觸控事件與預設行為（如滾動）衝突
         isBuilding = true;
         startCell = $(this);
-        if(e.button === 0){
-            tradeLine.show().css({ top: e.pageY, left: e.pageX,height:0 });
-        }
-        if (startCell.hasClass('call')) {startCell.css('background-color', '#7e0104');}
-        if (startCell.hasClass('put')) {startCell.css('background-color', '#045b1c');}
-    });
-    // 建倉表事件 拖拉
-    $(document).off('mousemove').on('mousemove', function (e) {
-        if (isBuilding) {
-            const nowCell = $(document.elementFromPoint(startCell.offset().left - window.scrollX, e.pageY - window.scrollY));
-            const offset = startCell.offset();
-            const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call')?0.25:0.75)-(startCell.hasClass('call')?linewidth:0);
-            const startY = offset.top + startCell.outerHeight() * 0.5;
-            const endX = e.pageX;
-            const endY = e.pageY;
 
-            if (nowCell.hasClass('call')) {nowCell.css('background-color', '#7e0104');}
-            if (nowCell.hasClass('put')) {nowCell.css('background-color', '#045b1c');}
+        const { pageX, pageY } = e.type === 'touchstart' ? getTouchEventPosition(e.originalEvent) : e;
+
+        tradeLine.show().css({ top: pageY, left: pageX, height: 0 });
+        if (startCell.hasClass('call')) {
+            startCell.css('background-color', '#7e0104');
+        }
+        if (startCell.hasClass('put')) {
+            startCell.css('background-color', '#045b1c');
+        }
+    });
+
+    // mousemove/touchmove
+    $(document).on('mousemove touchmove', function (e) {
+        if (isBuilding) {
+            const { pageX, pageY } = e.type === 'touchmove' ? getTouchEventPosition(e.originalEvent) : e;
+            const nowCell = $(document.elementFromPoint(
+                startCell.offset().left - window.scrollX,
+                pageY - window.scrollY
+            ));
+            const offset = startCell.offset();
+            const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call') ? 0.25 : 0.75) - (startCell.hasClass('call') ? linewidth : 0);
+            const startY = offset.top + startCell.outerHeight() * 0.5;
+
+            if (nowCell.hasClass('call')) {
+                nowCell.css('background-color', '#7e0104');
+            }
+            if (nowCell.hasClass('put')) {
+                nowCell.css('background-color', '#045b1c');
+            }
 
             tradeLine.css({
                 'width': linewidth,
-                'height': Math.max(endY-startY,startY-endY),
-                'top': Math.min(startY,endY),
+                'height': Math.abs(pageY - startY),
+                'top': Math.min(startY, pageY),
                 'left': startX,
-                'background-color': (startCell.hasClass('call')&&endY>startY)||(!startCell.hasClass('call')&&endY<startY) ? '#f00': '#0f0'
+                'background-color': (startCell.hasClass('call') && pageY > startY) || (!startCell.hasClass('call') && pageY < startY) ? '#f00' : '#0f0'
             });
         }
     });
-    // 建倉表事件 放開
-    $(document).off('mouseup').on('mouseup', function (e) {
+
+    // mouseup/touchend
+    $(document).on('mouseup touchend', function (e) {
         if (isBuilding) {
             isBuilding = false;
             tradeLine.hide();
 
-            endCell = $(document.elementFromPoint(startCell.offset().left - window.scrollX, e.pageY - window.scrollY));
+            const { pageX, pageY } = e.type === 'touchend' ? getTouchEventPosition(e.originalEvent) : e;
+            const endCell = $(document.elementFromPoint(
+                startCell.offset().left - window.scrollX,
+                pageY - window.scrollY
+            ));
+
             if (endCell && endCell.closest('#optionTable').length > 0 && (endCell.hasClass('call') || endCell.hasClass('put'))) {
                 const startPrice = startCell.siblings('.strike').text();
                 const endPrice = endCell.siblings('.strike').text();
-                const starttype = startCell.hasClass('call') ? 'buy_call' : 'buy_put';
-                const endtype = endCell.hasClass('call') ? 'sell_call' : 'sell_put';
+                const startType = startCell.hasClass('call') ? 'buy_call' : 'buy_put';
+                const endType = endCell.hasClass('call') ? 'sell_call' : 'sell_put';
 
                 const groupId = Math.max(
                     ...$('tr[data-id] .groupId').map(function () {
                         const value = $(this).val();
                         const numberPart = value.match(/\d+/); // 提取數字部分
                         return numberPart ? Number(numberPart[0]) : 0;
-                    }).get(), 
-                    0 // 當沒有任何 groupId 時，返回 -1
+                    }).get(),
+                    0
                 ) + 1;
 
                 const groupCode = 
-                    (endPrice>startPrice ? 'Bull ':'Bear ')+
-                    (startCell.hasClass('call') ? 'Call Spread ':'Put Spread ')+
+                    (endPrice > startPrice ? 'Bull ' : 'Bear ') +
+                    (startCell.hasClass('call') ? 'Call Spread ' : 'Put Spread ') +
                     groupId;
 
-                if(e.button === 0){
-                    if(startPrice!==endPrice){
-                        addItem(starttype,startPrice,groupCode,null,1);
-                        addItem(endtype,endPrice,groupCode,null,1);
-                    }else{
-                        addItem(starttype,startPrice,'',null,1);
+                if (e.type === 'mouseup' || e.type === 'touchend') {
+                    if (startPrice !== endPrice) {
+                        addItem(startType, startPrice, groupCode, null, 1);
+                        addItem(endType, endPrice, groupCode, null, 1);
+                    } else {
+                        addItem(startType, startPrice, '', null, 1);
                     }
-                }else if(startPrice==endPrice){
-                    addItem(endtype,endPrice,'',null,1);
+                } else if (startPrice == endPrice) {
+                    addItem(endType, endPrice, '', null, 1);
                 }
-                updateOptionTable();
             }
+            updateOptionTable();
+            finishBuild();
         }
     });
+
+    $('#overlay').off('click').on('click', function () {
+        finishBuild();
+    });
+
+    $("#mobileAddPosition").off('click').on('click', function () {
+        $('#overlay').show();
+        //遮罩
+        $('#overlay').css({
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width:'100vw',
+            height:'100vh',
+            zIndex:99999999,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        });
+        $('.trade-builder').show().css({
+            display: 'block',
+            position: 'fixed',
+            top: '25vh',
+            left: '10vw',
+            height: '50vh',
+            width: '80vw',
+            zIndex: 100000000,
+            overflowY: 'scroll',
+            backgroundColor: '#151515' 
+        });
+
+        // 固定表格的 thead 樣式
+        $('#optionTable>thead').css({
+            position: 'sticky',
+            top: '-1px',
+            zIndex: 100000001,
+            backgroundColor: '#151515' 
+        });
+        // 禁止 body 滾動
+        $('body').css({
+            overflow: 'hidden' // 禁用滾動
+        });
+
+    });
+
 
     // 滾動事件監聽
     $(window).off('scroll').on('scroll', updatefloatingChart);
@@ -296,6 +364,16 @@ $(document).ready(function () {
 
 });
 
+window.finishBuild = function() {
+    if(window.matchMedia("(orientation: portrait)").matches){   
+        $('.trade-builder').hide();
+        $('#overlay').hide();
+        $('body').css({
+            overflow: ''
+        });
+    }
+};
+
 window.setShareInfo = function() {
     $('.sharethis-inline-share-buttons')
             .attr('data-url', getShareUrl())
@@ -306,9 +384,14 @@ window.setShareInfo = function() {
 window.getShareUrl = function() {
     const processedPositions = positions.map(position => {
         const base36Data = getBase36FromData(position); // 將所有數字進行二進位編制
+        const gid = position.groupId
+            .replace(/\bBull Put Spread\b/g, 'bup')
+            .replace(/\bBear Put Spread\b/g, 'bep')
+            .replace(/\bBull Call Spread\b/g, 'buc')
+            .replace(/\bBear Call Spread\b/g, 'bec');
         return {
             b: base36Data,
-            t: position.groupId
+            t: gid
         };
     });
 
@@ -365,7 +448,11 @@ window.getDataFromBase36 = function (p) {
     position.isactive = extractBits(d, jsonDataLength.isactive) === 1;
     position.istest = extractBits(d, jsonDataLength.istest) === 1;
     position.type = typeMap[extractBits(d, jsonDataLength.type)];
-    position.groupId = p.t;
+    position.groupId = p.t
+            .replace(/\bbup\b/g, 'Bull Put Spread')
+            .replace(/\bbep\b/g, 'Bear Put Spread')
+            .replace(/\bbuc\b/g, 'Bull Call Spread')
+            .replace(/\bbec\b/g, 'Bear Call Spread');
     return position;
 };
 
@@ -413,7 +500,6 @@ window.convertBase36to10 = function (data) {
 
 window.updatefloatingChart = function () {
     const chartRect = chartDom.getBoundingClientRect();
-    if(!isshowfloatchart) return;
 
     if (chartRect.top < 0) {
         btt.css('visibility', 'visible');
@@ -426,6 +512,7 @@ window.updatefloatingChart = function () {
         );
     }
     
+    if(!isshowfloatchart) return;
     if (chartRect.bottom < 0) {
         // 計算小圖的寬高
         const ratio = 2.4;

@@ -16,6 +16,14 @@
     <meta property="og:title" content="我的持倉分享">
     <meta property="og:description" content="這是我的持倉計畫，快來看看！">
 
+    <!-- iphone app 模式 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
+
+    <!-- canonical 連結 -->
+    <link rel="canonical" href="https://ray8822881199.github.io/">
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -124,8 +132,10 @@
             <img id="floating-chart"/>
             <div class="chartTool">
                 <button id="comfirmPosition" style="margin: 5px">測試倉套用</button>
+                
+                <button id="mobileAddPosition">新增倉位</button><br>
                 <!-- ShareThis BEGIN -->
-                <div class="sharethis-inline-share-buttons" style="display: inline;"></div>
+                <div class="sharethis-inline-share-buttons" ></div>
                 <!-- ShareThis END -->
             </div>
             <div class="positions-container">
@@ -150,7 +160,7 @@
                     <tfoot>
                         <tr>
                             <td>
-                                <button id="addPosition">新增</button>
+                                <button id="addPosition">新增倉位</button>
                             </td>
                         </tr> 
                     </tfoot>
@@ -445,6 +455,8 @@
         <p><a href="privacy-policy.html" target="_blank">隱私政策</a> | 如有任何需要，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
         <a class="scroll-link back-to-top" href=".Warning"></a>
     </footer>
+
+    <div id="overlay" style="display: none;"></div>
 
     <!-- 引用 JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>

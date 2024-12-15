@@ -383,6 +383,11 @@ input[type="checkbox"]:hover {
     text-align: center;
 }
 
+
+#mobileAddPosition {
+    display: none;
+}
+
 /* 設定滾動條外觀 */
 ::-webkit-scrollbar {
     width: 12px; /* 設定垂直滾動條寬度 */
@@ -422,7 +427,7 @@ input[type="checkbox"]:hover {
     }
     .container, .right {
         width: 100%;
-        margin: 0;
+        margin: 10px 0px;
     }
     .positions-container {
         overflow-x: scroll;
@@ -462,5 +467,13 @@ input[type="checkbox"]:hover {
     }
     .back-to-top {
         right: 17px;
+    }
+
+    #mobileAddPosition {
+        display: inline;
+    }
+
+    #addPosition {
+        display: none;
     }
 }
