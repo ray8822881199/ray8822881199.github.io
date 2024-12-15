@@ -194,10 +194,10 @@ $(document).ready(function () {
             const { pageX, pageY } = e.type === 'touchmove' ? getTouchEventPosition(e.originalEvent) : e;
             const offset = startCell.offset();
             const nowCell = $(document.elementFromPoint(
-                offset.left - window.scrollX +60,
+                offset.left - window.scrollX + window.innerWidth * 0.1,
                 pageY - window.scrollY
             ));
-            $('#debug').text(`${pageX+'  '+pageY}`);
+            $('#debug').text(`${getTouchEventPosition(e.originalEvent)}`);
             const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call') ? 0.25 : 0.75) - (startCell.hasClass('call') ? linewidth : 0);
             const startY = offset.top + startCell.outerHeight() * 0.5;
 
@@ -226,7 +226,7 @@ $(document).ready(function () {
 
             const { pageX, pageY } = e.type === 'touchend' ? getTouchEventPosition(e.originalEvent) : e;
             const endCell = $(document.elementFromPoint(
-                startCell.offset().left - window.scrollX,
+                startCell.offset().left - window.scrollX + window.innerWidth * 0.1,
                 pageY - window.scrollY
             ));
 
