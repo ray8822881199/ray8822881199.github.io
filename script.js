@@ -176,7 +176,6 @@ $(document).ready(function () {
         e.preventDefault(); // 防止觸控事件與預設行為（如滾動）衝突
         isBuilding = true;
         startCell = $(this);
-
         const { pageX, pageY } = e.type === 'touchstart' ? getTouchEventPosition(e.originalEvent) : e;
 
         tradeLine.show().css({ top: pageY, left: pageX, height: 0 });
@@ -197,7 +196,7 @@ $(document).ready(function () {
                 offset.left - window.scrollX + 5,
                 pageY - window.scrollY
             ));
-            $('#debug').text(`${getTouchEventPosition(e.originalEvent)}`);
+            //$('#debug').text(`${getTouchEventPosition(e.originalEvent)}`);
             const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call') ? 0.25 : 0.75) - (startCell.hasClass('call') ? linewidth : 0);
             const startY = offset.top + startCell.outerHeight() * 0.5;
 
