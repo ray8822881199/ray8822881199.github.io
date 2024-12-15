@@ -194,7 +194,7 @@ $(document).ready(function () {
             const { pageX, pageY } = e.type === 'touchmove' ? getTouchEventPosition(e.originalEvent) : e;
             const offset = startCell.offset();
             const nowCell = $(document.elementFromPoint(
-                offset.left - window.scrollX + window.innerWidth * 0.1,
+                offset.left - window.scrollX + 5,
                 pageY - window.scrollY
             ));
             $('#debug').text(`${getTouchEventPosition(e.originalEvent)}`);
@@ -226,7 +226,7 @@ $(document).ready(function () {
 
             const { pageX, pageY } = e.type === 'touchend' ? getTouchEventPosition(e.originalEvent) : e;
             const endCell = $(document.elementFromPoint(
-                startCell.offset().left - window.scrollX + window.innerWidth * 0.1,
+                startCell.offset().left - window.scrollX + 5,
                 pageY - window.scrollY
             ));
 
