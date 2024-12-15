@@ -194,9 +194,10 @@ $(document).ready(function () {
             const { pageX, pageY } = e.type === 'touchmove' ? getTouchEventPosition(e.originalEvent) : e;
             const offset = startCell.offset();
             const nowCell = $(document.elementFromPoint(
-                offset.left - window.scrollX,
+                offset.left - window.scrollX +60,
                 pageY - window.scrollY
             ));
+            $('#debug').text(`${pageX+'  '+pageY}`);
             const startX = offset.left + startCell.outerWidth() * (startCell.hasClass('call') ? 0.25 : 0.75) - (startCell.hasClass('call') ? linewidth : 0);
             const startY = offset.top + startCell.outerHeight() * 0.5;
 
