@@ -27,6 +27,11 @@
     <!-- canonical 連結 -->
     <link rel="canonical" href="https://ray8822881199.github.io/">
 
+    <!-- 禁止緩存 -->
+    <meta http-equiv="Cache-Control" content="no-store">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -55,11 +60,18 @@
                         對於基礎策略的使用者也可以更好的理解持倉部位的損益效果，避開最常見的損平點計算錯誤問題。<br>
                         <br>
                         基本操作：<br>
-                        1. 輸入當前大盤點位並利用滑鼠在左側點選拖拉建立你的倉位，即可看到你的策略在各個位置的表現。<br>
-                        2. 左鍵單擊建立買方部位，右鍵單擊建立賣方部位。（僅左鍵可進行拖拉組合倉）<br>
-                        3. 分組中輸入相同文字代表互為組合單，保證金的計算會優先參考。（只允許組合兩個部位）<br>
-                        4. 請自行輸入手續費基數，系統會參考此基數進行費用試算。<br>
-                        5. <a class="scroll-link" href="#bmc">請平方喝杯咖啡</a><br>
+                        1. 輸入當前大盤點位。<br>
+                        2. 利用滑鼠在左側點選拖拉建立組合倉位，即可看到你的策略在各個位置的表現。(手機版點擊建立組合倉後在面板上拖拉)<br>
+                        3. 使用左鍵單擊建立買方部位，右鍵單擊建立賣方部位。（僅左鍵可進行拖拉組合倉）<br>
+                        4. 組合單代碼中輸入相同文字代表互為組合單，保證金的計算會優先參考相應的組合。（每個組合單只允許由兩個部位進行組合）<br>
+                        5. 輸入手續費基數，系統會參考此基數進行費用試算。<br>
+                        6. <a class="scroll-link" href="#bmc">請平方喝杯咖啡</a><br>
+                        <br>
+                        在手機上操作時建議可以選擇加到主畫面當捷徑，使用上手感會更好。<br>
+                        <br>
+                        建立手機桌面捷徑：<br>
+                        1. 點選分享。<br>
+                        2. 選擇加到主畫面。<br>
                         <br>
                         如果在靜態功能上有甚麼願望，也歡迎<a class="scroll-link" href="footer">寄許願信給平方</a><br>
                     </strong>
@@ -129,16 +141,15 @@
                     <span> (期貨手續 + 期貨期交稅) + </span>
                     <span> (選擇權手續 + 選擇權期交稅) : </span>
                     <span id="totalTaxAndFee">0</span>
-                    <span id="debug">0</span>
                 </span><br><br>
             </div>
             <div id="chart"></div>
             <img id="floating-chart"/>
             <div class="chartTool">
                 <button id="comfirmPosition" style="margin: 5px">測試倉套用</button>
-                
                 <button id="mobileAddPosition">新增組合倉位</button>
-                <button id="clearPosition">清空倉位</button><br>
+                <button id="clearPosition">清空倉位</button>
+                <br>
                 <!-- ShareThis BEGIN -->
                 <div class="sharethis-inline-share-buttons" ></div>
                 <!-- ShareThis END -->
