@@ -64,7 +64,8 @@
                         3. 使用左鍵單擊建立買方部位，右鍵單擊建立賣方部位。（僅左鍵可進行拖拉組合倉）<br>
                         4. 組合單代碼中輸入相同文字代表互為組合單，保證金的計算會優先參考相應的組合。（每個組合單只允許由兩個部位進行組合）<br>
                         5. 輸入手續費基數，系統會參考此基數進行費用試算。<br>
-                        6. <a class="scroll-link" href="#bmc">請平方喝杯咖啡</a><br>
+                        6. 點選分享到社群的按鈕，可以將現在的持倉設定分享給別人。<br>
+                        7. <a class="scroll-link" href="#bmc">請平方喝杯咖啡</a><br>
                         <br>
                         在手機上操作時建議可以選擇加到主畫面當捷徑，使用上手感會更好。<br>
                         <br>
@@ -142,6 +143,9 @@
                     <span id="totalTaxAndFee">0</span>
                 </span><br><br>
             </div>
+            <!-- ShareThis BEGIN -->
+            <div class="sharethis-inline-share-buttons" style="margin: 10px 0px;"></div>
+            <!-- ShareThis END -->
             <div id="chart"></div>
             <div style="height:90px;width: 100%;text-align: center;">
                 <!-- main-fix-1 -->
@@ -158,10 +162,6 @@
                 <button id="comfirmPosition" style="margin: 5px">測試倉套用</button>
                 <button id="mobileAddPosition">新增組合倉位</button>
                 <button id="clearPosition">清空倉位</button>
-                <br>
-                <!-- ShareThis BEGIN -->
-                <div class="sharethis-inline-share-buttons" ></div>
-                <!-- ShareThis END -->
             </div>
             <div class="positions-container">
                 <table id="positions" border="1">
