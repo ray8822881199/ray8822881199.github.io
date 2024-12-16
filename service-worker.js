@@ -1,4 +1,3 @@
-const CACHE_NAME = 'v1_cache';
 
 // 安裝 Service Worker
 self.addEventListener('install', (event) => {
