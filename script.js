@@ -96,16 +96,6 @@ let startCell = null; // 開始的單元格
 let endCell = null; // 結束的單元格
 
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-            console.log('Service Worker registered with scope: ', registration.scope);
-        }).catch((error) => {
-            console.log('Service Worker registration failed: ', error);
-        });
-    });
-}
-
 // 畫面主邏輯
 $(document).ready(function () {
 
