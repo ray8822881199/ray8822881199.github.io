@@ -27,14 +27,14 @@ window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
 window.marginInfo={
-    // 原始保證金
+    // 原始
     od:{
         miniMargin: 80500,
         AValue: 81000,
         BValue: 41000,
         CValue: 8200
     },
-    // 維持保證金
+    // 維持
     mm:{
         miniMargin: 61750,
         AValue: 63000,
@@ -264,6 +264,10 @@ $(document).ready(function () {
             updateOptionTable();
             finishBuild();
         }
+        // 隱藏tooltip
+        chart.dispatchAction({
+            type: 'hideTip'
+        });
     });
 
     $('#overlay').off('click').on('click', function () {
@@ -283,6 +287,8 @@ $(document).ready(function () {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
         });
         $('.trade-builder').show().css({
+            border: '2px #ccc solid',
+            borderRadius: '7px',
             display: 'block',
             position: 'fixed',
             top: '25vh',
@@ -304,7 +310,14 @@ $(document).ready(function () {
         $('body').css({
             overflow: 'hidden' // 禁用滾動
         });
+        // 滾動到畫面中間（內容的 50%）
+        const tradeBuilder = $('.trade-builder');
+        const scrollHeight = tradeBuilder[0].scrollHeight; // 獲取內容高度
+        const targetScroll = scrollHeight / 2 - (window.innerHeight * 0.25); // 計算目標位置
 
+        tradeBuilder.animate({
+            scrollTop: targetScroll
+        }, 300); // 500 毫秒的動畫時間
     });
 
 
@@ -356,12 +369,11 @@ $(document).ready(function () {
         updateChart();
     });
 
+    // 清空艙位
     $('#clearPosition').off('click').on('click', function(){
         $('.remove-btn').trigger('click');
     });
 
-
-    
     getUrlPosi();
     initChart();
     updateOptionTable();
@@ -662,6 +674,7 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
     ) + 1;
     const row = $(`
         <tr data-id="${positionId}" class="position-row">
+            <td><button class="remove-btn">移除</button></td>
             <td>
                 <select class="position-select">
                     <option value="" disabled selected>選擇類型</option>
@@ -681,7 +694,6 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
             <td><input type="checkbox" class="isclosed"/></td>
             <td><input type="number" inputmode="decimal" class="close-amount" placeholder="平倉點數" style="width: 70px;"/></td>
             <td><input type="text" class="groupId" placeholder="分組標籤" style="width: 150px;"/></td>
-            <td><button class="remove-btn">移除</button></td>
         </tr>
     `); 
 
@@ -706,7 +718,7 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
     positionOptions.forEach(option => {
         row.find('.position-select').append(new Option(option.text, option.id));
     });
-    $('#positions tbody').append(row);
+    $('#positions tbody').prepend(row);
 
     // 填入資料
     if (itemType) {
@@ -1177,7 +1189,7 @@ window.updateChart = function () {
         od_marginData.push([price, od_totalMargin[i]]);
         mm_marginData.push([price, mm_totalMargin[i]]);
 
-        // 保證金獲利率
+        // 獲利率
         profitRateData.push(
             [
                 price, 
@@ -1198,10 +1210,10 @@ window.updateChart = function () {
             position: 'cyan',       // 持倉線顏色
             applied: '#FFCC22',      // 套用後線顏色
             test: ' #FF3333',            // 測試倉線顏色
-            od: '#E93EFF',          // 原始保證金線顏色
-            mm: '#E93EFF',          // 維持保證金線顏色
+            od: '#E93EFF',          // 原始線顏色
+            mm: '#E93EFF',          // 維持線顏色
         },
-        tooltipBackgroundColor: 'rgba(0, 0, 0, 0.4)', // 提示框背景色 (深色，70%透明度)
+        tooltipBackgroundColor: 'rgba(0, 0, 0, 0.8)', // 提示框背景色 (深色，70%透明度)
         tooltipTextColor: '#dcdcdc'                   // 提示框文字顏色
     };
 
@@ -1252,18 +1264,18 @@ window.updateChart = function () {
                 params.forEach(item => {
                     let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
                     let content = `
-                        <div style="display: flex; justify-content: space-between; width: 200px;">
+                        <div style="display: flex; justify-content: space-between; width: 150px;">
                             <span style="text-align: left;">${item.marker}${item.seriesName}</span>
                             <span style="text-align: right;">${value.toFixed(2)}</span>
                         </div>
                     `;
-                    if (['持倉','測試倉套用','測試倉'].includes(item.seriesName)) {
+                    if (['持倉','套用後','測試倉'].includes(item.seriesName)) {
                         positionContent += content;
-                    } else if (['原始保證金','維持保證金'].includes(item.seriesName)) {
+                    } else if (['原始','維持'].includes(item.seriesName)) {
                         marginContent += content;
-                    } else if (['保證金獲利率'].includes(item.seriesName)) {
+                    } else if (['獲利率'].includes(item.seriesName)) {
                         marginContent += `
-                        <div style="display: flex; justify-content: space-between; width: 200px;">
+                        <div style="display: flex; justify-content: space-between; width: 150px;">
                             <span style="text-align: left;">${item.marker}${item.seriesName}</span>
                             <span style="text-align: right;">${(value*100).toFixed(2)}%</span>
                         </div>
@@ -1428,7 +1440,7 @@ window.updateChart = function () {
                 }
             },
             {
-                name: '測試倉套用',
+                name: '套用後',
                 type: 'line',
                 xAxisIndex: 0,
                 yAxisIndex: 0,
@@ -1461,7 +1473,7 @@ window.updateChart = function () {
             },
             // 下方圖表數據
             {
-                name: '原始保證金',
+                name: '原始',
                 type: 'line',
                 xAxisIndex: 1,
                 yAxisIndex: 1,
@@ -1476,7 +1488,7 @@ window.updateChart = function () {
                 }
             },
             {
-                name: '維持保證金',
+                name: '維持',
                 type: 'line',
                 xAxisIndex: 1,
                 yAxisIndex: 1,
@@ -1492,7 +1504,7 @@ window.updateChart = function () {
                 }
             },
             {
-                name: '保證金獲利率',
+                name: '獲利率',
                 type: 'line',
                 xAxisIndex: 2,
                 yAxisIndex: 2,

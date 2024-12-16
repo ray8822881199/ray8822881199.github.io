@@ -230,7 +230,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .back-to-top {
     position: fixed; 
-    bottom: 17px; 
+    bottom: 70px; 
     right: 268px; 
     width: 50px; 
     height: 50px; 
@@ -249,6 +249,19 @@ input[type="number"]::-webkit-outer-spin-button {
     height: 10px; 
     border-left: 3px solid white;
     border-top: 3px solid white;
+}
+
+.refBtn {
+    position: fixed; 
+    right: 268px; 
+    bottom: 17px; 
+    width: 50px; 
+    height: 50px; 
+    z-index: 1000; 
+    opacity: 0.5;
+    background-color: #666;
+    color: #fff;
+    align-content: center;
 }
 
 /* 成交線 */
@@ -466,6 +479,9 @@ input[type="checkbox"]:hover {
         right: 17px;
     }
     .back-to-top {
+        right: 17px;
+    }
+    .refBtn {
         right: 17px;
     }
 

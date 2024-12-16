@@ -10,6 +10,7 @@
     <title>一平方的選擇權計算機</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" href="favicon.png" type="image/x-icon">
 
     <!-- 預設的 meta 分享標籤 -->
@@ -23,7 +24,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <!-- Android 全螢幕模式 -->
     <meta name="mobile-web-app-capable" content="yes">
-    
+
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
 
@@ -156,6 +157,7 @@
                 <table id="positions" border="1">
                     <thead>
                         <tr>
+                            <th><button id="addPosition">新增倉位</button></th>
                             <th>類型</th>
                             <th>持倉點位</th>
                             <th>建倉成本</th>
@@ -165,19 +167,12 @@
                             <th>已平倉</th>
                             <th>平倉點數</th>
                             <th>組合單代碼</th>
-                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- 這裡會動態插入每一筆持倉的資料 -->
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>
-                                <button id="addPosition">新增倉位</button>
-                            </td>
-                        </tr> 
-                    </tfoot>
+
                 </table>
             </div>
         </div>
@@ -195,7 +190,31 @@
                 <label for="precision">精細度</label><br>
                 <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200" style="width: calc(100% - 16px);"/>
             </span>
-            <div id="prime_location" style="background-color: #333;height: 450px;padding: 5px;margin: 5px;">閒置區塊</div>
+            <!-- <div id="prime_location" style="background-color: #333;height: 450px;padding: 5px;margin: 5px;">閒置區塊</div> -->
+            <div>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="2396796768"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            <div>
+                <!-- autosize -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-6002813508124164"
+                     data-ad-slot="1396101511"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
         </div>
     </div>
     <div id="opknows">
@@ -378,30 +397,7 @@
             </div>
         </div>
         <div class="opknows_right">
-            <div>
-                <!-- autosize -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-6002813508124164"
-                     data-ad-slot="2396796768"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-            <div>
-                <!-- autosize -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-6002813508124164"
-                     data-ad-slot="1396101511"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
+            
             <div>
                 <!-- autosize -->
                 <ins class="adsbygoogle"
@@ -468,6 +464,7 @@
         </p>
         <p><a href="privacy-policy.html" target="_blank">隱私政策</a> | 如有任何需要，請聯繫 <a href="mailto:ray8822881199@gmail.com">ray8822881199@gmail.com</a>。</p>
         <a class="scroll-link back-to-top" href=".Warning"></a>
+        <a class="refBtn" href="#" onclick="location.reload(); return false;"><i class="material-icons">refresh</i></a>
     </footer>
 
     <div id="overlay" style="display: none;"></div>
