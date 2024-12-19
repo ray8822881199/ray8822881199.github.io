@@ -384,11 +384,12 @@ $(document).ready(function () {
 window.finishBuild = function() {
     if(window.matchMedia("(orientation: portrait)").matches){   
         $('.trade-builder').hide();
-        $('#overlay').hide();
-        $('body').css({
-            overflow: ''
-        });
     }
+    $('.close-pnl').hide();
+    $('#overlay').hide();
+    $('body').css({
+        overflow: ''
+    });
 };
 
 window.setShareInfo = function() {
@@ -692,7 +693,12 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
             <td><input type="checkbox" class="istest" checked/></td>
             <td><input type="checkbox" class="isactive" ${isdrawtest?'checked':''}/></td>
             <td><input type="checkbox" class="isclosed"/></td>
-            <td><input type="number" inputmode="decimal" class="close-amount" placeholder="平倉點數" style="width: 70px;"/></td>
+            <td>
+                <div class="partial-close">
+                    <input type="number" inputmode="decimal" class="close-amount" placeholder="平倉點數" style="width: 70px;"/>
+                    <button type="button" class="partial-close-btn" style="width: 90px;">部分平倉</button>
+                </div>
+            </td>
             <td><input type="text" class="groupId" placeholder="分組標籤" style="width: 150px;"/></td>
         </tr>
     `); 
@@ -712,6 +718,49 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
             quantityInput.val(currentValue - 1);
         }
         row.find('.position-select').trigger('change');
+    });
+
+    row.find('.partial-close-btn').off('click').on('click', function () {
+        if(!row.find('.isclosed').prop('checked')){
+            // 禁止 body 滾動
+            $('body').css({
+                overflow: 'hidden' // 禁用滾動
+            });
+            const dialog = $('#partialCloseDialog')[0];
+            const positionInfoDiv = $('#partialCloseDialog').find('#partialPositionInfo');
+            const positionTypeText = row.find('.position-select').find(':selected').text();
+
+            positionInfoDiv.html(
+                `本倉位資訊 : ${
+                    positionTypeText || '未選擇'
+                } @ ${
+                    row.find('.strike-price').val() || 0
+                } / ${
+                    row.find('.cost').val() || 0
+                } * ${
+                    row.find('.quantity').val() || 0
+                }`);
+
+            dialog.showModal(); // 顯示對話框
+            $('#dialogCancelBtn').off('click').on('click', function () {
+                dialog.close(); // 關閉對話框
+                finishBuild();
+            });
+            $('#dialogConfirmBtn').off('click').on('click', function () {
+                const closePoint = Number($('#dialogClosePoint').val());
+                const closeQuantity = Number($('#dialogCloseQuantity').val());
+                if (isNaN(closePoint) || isNaN(closeQuantity) || closeQuantity <= 0) {
+                    alert('請輸入有效的平倉點數與平倉口數');
+                    return;
+                }else{
+                    partialClose(positionId, closePoint, closeQuantity);
+                }
+                dialog.close();
+                finishBuild();
+            });
+        }else{
+            alert('該倉位已完全平倉。');
+        }
     });
 
     // 動態加入選項
@@ -761,6 +810,38 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
     });
     // 觸發更新
     row.find('.position-select').trigger('change');
+};
+
+window.partialClose = function (positionId, closePoint, closeQuantity) {
+    //找到對應的row
+    const row = $(`tr[data-id=${positionId}]`);
+
+    const closeAmountInput = row.find('.close-amount');
+    const quantityInput = row.find('.quantity');
+    const isclosedInput = row.find('.isclosed');
+
+    const currentValue = parseInt(quantityInput.val()) || 0;
+    const isclosed = isclosedInput.prop('checked');
+    const itemType = row.find('.position-select').val();
+    const itemPrice = row.find('.strike-price').val();
+    const itemCost = row.find('.cost').val();
+
+    if((currentValue > closeQuantity) && (!isclosed)){
+        //將該row的持倉口數減去closeQuantity
+        quantityInput.val(currentValue - closeQuantity);
+        row.find('.position-select').trigger('change');
+        //新增一筆已在closePoint平倉closeQuantity口之資料
+        addItem(itemType, itemPrice, '', itemCost, closeQuantity, 0, 1, 1, closePoint);
+    }else if((currentValue == closeQuantity) && (!isclosed)){
+        //口數與剩餘相同 直接修改為已平倉
+        closeAmountInput.val(closePoint);
+        isclosedInput.prop('checked', true);
+        row.find('.istest').prop('checked', false);
+        row.find('.position-select').trigger('change');
+    }else{
+        alert('剩餘口數不足。');
+    }
+
 };
 
 

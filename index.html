@@ -467,6 +467,21 @@
         <a class="refBtn" href="#" onclick="location.reload(); return false;"><i class="material-icons">refresh</i></a>
     </footer>
 
+    <dialog id="partialCloseDialog" style="width: 300px; padding: 20px; border: none; border-radius: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <form method="dialog" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>請輸入需要部份平倉的點數及口數，系統將自動處理倉位調整。小台的點數請輸入平倉點位。</div>
+            <div id='partialPositionInfo'>--/-----/----/----</div>
+            <label for="dialogClosePoint">平倉點數：</label>
+            <input type="number" inputmode="decimal" id="dialogClosePoint" style="width: 100%;"/>
+            <label for="dialogCloseQuantity">平倉口數：</label>
+            <input type="number" inputmode="numeric" id="dialogCloseQuantity" style="width: 100%;"/>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button type="button" id="dialogCancelBtn">取消</button>
+                <button type="submit" id="dialogConfirmBtn">確定</button>
+            </div>
+        </form>
+    </dialog>
+
     <div id="overlay" style="display: none;"></div>
 
     <!-- 引用 JavaScript -->
