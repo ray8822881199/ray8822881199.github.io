@@ -751,6 +751,7 @@ window.addItem = function (itemType, itemPrice, itemGroupId, itemCost, itemQuant
                 const closeQuantity = Number($('#dialogCloseQuantity').val());
                 if (isNaN(closePoint) || isNaN(closeQuantity) || closeQuantity <= 0) {
                     alert('請輸入有效的平倉點數與平倉口數');
+                    finishBuild();
                     return;
                 }else{
                     partialClose(positionId, closePoint, closeQuantity);
