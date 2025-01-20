@@ -250,7 +250,7 @@ $(document).ready(function () {
                     (startCell.hasClass('call') ? 'Call Spread ' : 'Put Spread ') +
                     groupId;
 
-                if (e.type === 'mouseup' || e.type === 'touchend') {
+                if ((e.button === 0 && e.type === 'mouseup') || (e.type === 'touchend')) {
                     if (startPrice !== endPrice) {
                         addItem(startType, startPrice, groupCode, null, 1);
                         addItem(endType, endPrice, groupCode, null, 1);
