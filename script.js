@@ -13,7 +13,7 @@ window.positions = []; // 存放所有持倉數據
 
 window.contractMultiplier=50; // 每點價值
 
-window.dataDate = new Date('2025-02-06'); // 資料更新日期
+window.dataDate = new Date('2025-03-25'); // 資料更新日期
 window.underlyingPrice = 23000; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
@@ -29,17 +29,19 @@ window.tax = 0; // 總期交稅
 window.marginInfo={
     // 原始
     od:{
-        miniMargin: 80500,
-        AValue: 81000,
-        BValue: 41000,
-        CValue: 8200
+        miniMargin: 76750,
+        microMargin: 15350,
+        AValue: 77000,
+        BValue: 39000,
+        CValue: 7800
     },
     // 維持
     mm:{
-        miniMargin: 61750,
-        AValue: 63000,
-        BValue: 32000,
-        CValue: 6400
+        miniMargin: 58750,
+        microMargin: 11750,
+        AValue: 59000,
+        BValue: 30000,
+        CValue: 6000
     }
 };
 
@@ -59,10 +61,12 @@ window.jsonDataLength = {
 $("#dataGetDate").text(window.dataDate.toISOString().split('T')[0]);
 $("#contractMultiplier").text(window.contractMultiplier);
 $("#od-miniMargin").text(window.marginInfo.od.miniMargin);
+$("#od-microMargin").text(window.marginInfo.od.microMargin);
 $("#od-AValue").text(window.marginInfo.od.AValue);
 $("#od-BValue").text(window.marginInfo.od.BValue);
 $("#od-CValue").text(window.marginInfo.od.CValue);
 $("#mm-miniMargin").text(window.marginInfo.mm.miniMargin);
+$("#mm-microMargin").text(window.marginInfo.mm.microMargin);
 $("#mm-AValue").text(window.marginInfo.mm.AValue);
 $("#mm-BValue").text(window.marginInfo.mm.BValue);
 $("#mm-CValue").text(window.marginInfo.mm.CValue);
@@ -82,6 +86,8 @@ const btt = $('.back-to-top');
 const positionOptions = [
     { id: 'long_mini', text: '小台多單' },
     { id: 'short_mini', text: '小台空單' },
+    { id: 'long_micro', text: '微台多單' },
+    { id: 'short_micro', text: '微台空單' },
     { id: 'buy_call', text: 'Buy Call' },
     { id: 'sell_call', text: 'Sell Call' },
     { id: 'buy_put', text: 'Buy Put' },
@@ -453,7 +459,7 @@ window.getUrlPosi = function() {
 
 window.getDataFromBase36 = function (p) {
 
-    const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put"];
+    const typeMap = ["long_mini", "short_mini", "buy_call", "sell_call", "buy_put", "sell_put", "long_micro", "short_micro"];
     const d = convertBase36to10(p.b);
 
     let shift = 0;
@@ -490,7 +496,9 @@ window.getBase36FromData = function (position) {
         "buy_call": 2,
         "sell_call": 3,
         "buy_put": 4,
-        "sell_put": 5
+        "sell_put": 5,
+        "long_micro": 6,
+        "short_micro": 7
     };
 
     let combined = 0n;
@@ -624,7 +632,7 @@ window.updatePositions = function (row) {
     const pos = positions.find((p) => p.positionId === positionId);
 
     // 期貨填寫格式限制
-    if (type && type.split('_')[1] === 'mini') {
+    if (type && (type.split('_')[1] === 'mini' || type.split('_')[1] === 'micro')) {
         $cost.prop('readonly', true); 
     } else {
         $cost.prop('readonly', false);
@@ -1159,6 +1167,7 @@ window.updateChart = function () {
         const closeAmount = pos.closeAmount || 0;
 
         const isMini = pos.type.split('_')[1] === 'mini';
+        const isMicro = pos.type.split('_')[1] === 'micro';
         const isClosed = pos.isclosed;
         const isTest = pos.istest;
 
@@ -1171,6 +1180,13 @@ window.updateChart = function () {
                 totalMiniTax += 
                     (Math.round((strikePrice * contractMultiplier) * miniTaxRate,0) + 
                     Math.round((( isClosed ? closeAmount : 0 ) * contractMultiplier) * miniTaxRate,0)) * quantity;
+            } else if (isMicro) {
+                // 手續費
+                tradeMiniCount += (isClosed ? quantity * 2 : quantity);
+                // 期交稅計算
+                totalMiniTax += 
+                    (Math.round((strikePrice * contractMultiplier / 5) * miniTaxRate,0) + 
+                    Math.round((( isClosed ? closeAmount : 0 ) * contractMultiplier / 5) * miniTaxRate,0)) * quantity;
             } else {
                 // 手續費
                 tradeOpCount += (isClosed ? quantity * 2 : quantity);
@@ -1193,6 +1209,12 @@ window.updateChart = function () {
                     case 'short_mini':
                         profit = (strikePrice - closingPrice ) * quantity;
                         break;
+                    case 'long_micro':
+                        profit = (closingPrice - strikePrice ) * quantity / 5;
+                        break;
+                    case 'short_micro':
+                        profit = (strikePrice - closingPrice ) * quantity / 5;
+                        break;
                     case 'buy_call':
                         profit = closingPrice <= strikePrice ? -cost * quantity : (closingPrice - strikePrice - cost) * quantity;
                         break;
@@ -1213,6 +1235,12 @@ window.updateChart = function () {
                         break;
                     case 'short_mini':
                         profit = (strikePrice - closeAmount) * quantity;
+                        break;
+                    case 'long_micro':
+                        profit = (closeAmount - strikePrice) * quantity / 5;
+                        break;
+                    case 'short_micro':
+                        profit = (strikePrice - closeAmount) * quantity / 5;
                         break;
                     case 'buy_call':
                         profit = (closeAmount - cost) * quantity;
