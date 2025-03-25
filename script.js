@@ -1004,8 +1004,9 @@ window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal
         const isSell = positionType === 'sell';
         const isBuy = positionType === 'buy';
         const isMini = optionType === 'mini';
+        const isMicro = optionType === 'micro';
 
-        if (!isSell && !isBuy && !isMini) {
+        if (!isSell && !isBuy && !isMini && !isMicro) {
             throw new Error('無效的持倉類型。');
         }
         // 計算
@@ -1016,7 +1017,13 @@ window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal
         if(isMini){
             premiumReceived = 0;
             premiumPaid = 0;
-            margin = isOriginal ? marginInfo.od.miniMargin : marginInfo.mm.miniMargin;
+            margin = isOriginal ? marginInfo.od.microMargin : marginInfo.mm.microMargin;
+        }
+
+        if(isMicro){
+            premiumReceived = 0;
+            premiumPaid = 0;
+            margin = isOriginal ? marginInfo.od.microMargin : marginInfo.mm.microMargin;
         }
 
         return {
