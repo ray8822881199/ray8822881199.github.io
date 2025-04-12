@@ -13,7 +13,7 @@ window.positions = []; // 存放所有持倉數據
 
 window.contractMultiplier=50; // 每點價值
 
-window.dataDate = new Date('2025-03-25'); // 資料更新日期
+window.dataDate = new Date('2025-04-12'); // 資料更新日期
 window.underlyingPrice = 19500; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
@@ -26,22 +26,22 @@ window.totalFee = 0; // 當前手續
 window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
-window.marginInfo={
+window.marginInfo = {
     // 原始
-    od:{
-        miniMargin: 76750,
-        microMargin: 15350,
-        AValue: 77000,
-        BValue: 39000,
-        CValue: 7800
+    od: {
+        miniMargin: 84500,
+        microMargin: 16900,
+        AValue: 86000,
+        BValue: 43000,
+        CValue: 8600
     },
     // 維持
-    mm:{
-        miniMargin: 58750,
-        microMargin: 11750,
-        AValue: 59000,
-        BValue: 30000,
-        CValue: 6000
+    mm: {
+        miniMargin: 64750,
+        microMargin: 12950,
+        AValue: 66000,
+        BValue: 33000,
+        CValue: 6600
     }
 };
 
@@ -385,7 +385,49 @@ $(document).ready(function () {
     updateOptionTable();
     updateChart();
 
+    //抓前一次的大盤收盤
+    (async function () {
+        const result = await getLastTradingDate();
+        const close = getTaiexClose(result.data);
+        const closeInt = Math.round(parseFloat(close.replace(/,/g, '')));
+
+        $('#date').text(result.date);
+        $('#close').text(close ?? '查無資料');
+        $('#market-price').val(closeInt ?? underlyingPrice);
+    })();
+
 });
+
+
+//抓前一次的大盤收盤
+async function formatDate(d) {
+  return d.toISOString().split('T')[0].replace(/-/g, '');
+}
+async function getLastTradingDate(maxTries = 10) {
+    let today = new Date();
+    let tries = 0;
+
+    while (tries < maxTries) {
+        today.setDate(today.getDate() - 1);
+        const dateStr = await formatDate(today);
+        const url = `https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=${dateStr}&type=IND&response=json`;
+
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.stat === 'OK' && json.tables?.[0]?.data?.length) {
+            return { date: dateStr, data: json.tables[0].data };
+        }
+
+        tries++;
+    }
+
+    throw new Error('找不到最近的交易日');
+}
+function getTaiexClose(data) {
+    const row = data.find(r => r[0].includes('發行量加權股價指數'));
+    return row ? row[1] : null;
+}
 
 window.finishBuild = function() {
     if(window.matchMedia("(orientation: portrait)").matches){   
