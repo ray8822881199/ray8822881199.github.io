@@ -14,7 +14,7 @@ window.positions = []; // 存放所有持倉數據
 window.contractMultiplier=50; // 每點價值
 
 window.dataDate = new Date('2025-03-25'); // 資料更新日期
-window.underlyingPrice = 23000; // 價平
+window.underlyingPrice = 19500; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
 window.isshowfloatchart = true; // 計算測試倉
