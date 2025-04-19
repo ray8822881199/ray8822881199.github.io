@@ -13,7 +13,6 @@ window.positions = []; // 存放所有持倉數據
 
 window.contractMultiplier=50; // 每點價值
 
-window.dataDate = new Date('2025-04-12'); // 資料更新日期
 window.underlyingPrice = 19500; // 價平
 window.isdrawtest = true; // 繪制測試倉
 window.iscalctest = true; // 計算測試倉
@@ -26,22 +25,24 @@ window.totalFee = 0; // 當前手續
 window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
+
+window.dataDate = new Date('2025-04-19'); // 資料更新日期
 window.marginInfo = {
     // 原始
     od: {
-        miniMargin: 84500,
-        microMargin: 16900,
-        AValue: 86000,
-        BValue: 43000,
-        CValue: 8600
+        miniMargin: 89000,
+        microMargin: 17800,
+        AValue: 91000,
+        BValue: 46000,
+        CValue: 9200
     },
     // 維持
     mm: {
-        miniMargin: 64750,
-        microMargin: 12950,
-        AValue: 66000,
-        BValue: 33000,
-        CValue: 6600
+        miniMargin: 68250,
+        microMargin: 13650,
+        AValue: 70000,
+        BValue: 35000,
+        CValue: 7000
     }
 };
 
