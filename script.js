@@ -26,24 +26,22 @@ window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
 
-window.dataDate = new Date('2025-04-19'); // 資料更新日期
+window.dataDate = new Date('2025/04/16'); // 資料更新日期
 window.marginInfo = {
-    // 原始
-    od: {
+    od: { // 原始 
         miniMargin: 89000,
         microMargin: 17800,
         AValue: 91000,
         BValue: 46000,
         CValue: 9200
-    },
-    // 維持
-    mm: {
+    }, 
+    mm: { // 維持 
         miniMargin: 68250,
         microMargin: 13650,
         AValue: 70000,
         BValue: 35000,
         CValue: 7000
-    }
+    } 
 };
 
 // 限制資料位元數 小數部分只取一位 其餘失真
