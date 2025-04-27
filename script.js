@@ -1070,7 +1070,7 @@ window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal
         return {
             p1: positionIds[0],
             p2: null,
-            margin: margin,
+            margin: margin * position.quantity,
             premiumReceived: premiumReceived,
             premiumPaid: premiumPaid
         };
