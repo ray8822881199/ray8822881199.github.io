@@ -389,10 +389,13 @@ $(document).ready(function () {
         const result = await getLastTradingDate();
         const close = getTaiexClose(result.data);
         const closeInt = Math.round(parseFloat(close.replace(/,/g, '')));
-
+        underlyingPrice = closeInt ?? underlyingPrice;
+        priceRange = { min: underlyingPrice*(1-analysisWidth/100), max: underlyingPrice*(1+analysisWidth/100) };
         $('#date').text(result.date);
         $('#close').text(close ?? '查無資料');
-        $('#market-price').val(closeInt ?? underlyingPrice);
+        $('#market-price').val(underlyingPrice);
+        updateOptionTable();
+        updateChart();
     })();
 
 });
@@ -1418,6 +1421,7 @@ window.updateChart = function () {
                 let tooltipContent = `點位：${params[0].axisValue}<br>`;
                 let positionContent = ""; // 用於存放持倉內容
                 let marginContent = "";   // 用於存放保證金內容
+                let marginValue = 0; //原始保證金
                 // 遍歷每一條線
                 params.forEach(item => {
                     let value = Array.isArray(item.data) ? item.data[1] : item.data; // 取得數據
@@ -1571,7 +1575,7 @@ window.updateChart = function () {
             show: false,
             pieces: [
                 {
-                    gt: -1000,
+                    gt: -99999999,
                     lte: 0,
                     color: '#0f0'
                 }
