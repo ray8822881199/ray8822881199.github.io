@@ -1058,7 +1058,7 @@ window.calculateComboMarginAndPremium = function (positionIds, price, isOriginal
         if(isMini){
             premiumReceived = 0;
             premiumPaid = 0;
-            margin = isOriginal ? marginInfo.od.microMargin : marginInfo.mm.microMargin;
+            margin = isOriginal ? marginInfo.od.miniMargin : marginInfo.mm.miniMargin;
         }
 
         if(isMicro){
