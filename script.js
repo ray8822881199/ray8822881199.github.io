@@ -26,7 +26,7 @@ window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
 
-window.dataDate = new Date('2025-04-23'); // 資料更新日期
+window.dataDate = new Date('2025-05-20'); // 資料更新日期
 window.marginInfo = {
     od: { // 原始 
         miniMargin: 89000,
