@@ -26,21 +26,22 @@ window.opTaxRate = 0.001; // 期交稅率(選擇權)
 window.miniTaxRate = 0.00002; // 期交稅率(期貨)
 window.tax = 0; // 總期交稅
 
-window.dataDate = new Date('2025-07-23'); // 資料更新日期
+// 來源：https://www.taifex.com.tw/cht/5/indexMarging（2026-10-13 查核）
+window.dataDate = new Date('2026-08-12'); // 期交所保證金表更新日期
 window.marginInfo = {
     od: { // 原始 
-        miniMargin: 84750,
-        microMargin: 16950,
-        AValue: 86000,
-        BValue: 43000,
-        CValue: 8600
+        miniMargin: 175250,
+        microMargin: 35050,
+        AValue: 187000,
+        BValue: 94000,
+        CValue: 18800
     }, 
     mm: { // 維持 
-        miniMargin: 65000,
-        microMargin: 13000,
-        AValue: 66000,
-        BValue: 33000,
-        CValue: 6600
+        miniMargin: 134500,
+        microMargin: 26900,
+        AValue: 143000,
+        BValue: 72000,
+        CValue: 14400
     } 
 };
 
@@ -118,6 +119,7 @@ $(document).ready(function () {
     $('#market-price').val(underlyingPrice);
     $('#analysis-width').val(analysisWidth);
     $('#precision').val(part);
+    $('#lightning-width').val(point);
     $("#opFee").val(window.opFee);
     $("#miniFee").val(window.miniFee);
 
@@ -143,6 +145,8 @@ $(document).ready(function () {
         miniFee = Number($('#miniFee').val()||miniFee);
 
         part = Number($('#precision').val()||part);
+        const lightningWidth = Number($('#lightning-width').val());
+        point = [50, 100, 150, 200].includes(lightningWidth) ? lightningWidth : 50;
         priceRange = { min: underlyingPrice*(1-analysisWidth/100), max: underlyingPrice*(1+analysisWidth/100) };
  
         updateOptionTable();

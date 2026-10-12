@@ -200,6 +200,15 @@
                 <input type="range" id="analysis-width" class="overall_config" placeholder="分析寬度" min="1" max="10" style="width: calc(100% - 16px);"/><br>
                 <label for="precision">精細度</label><br>
                 <input type="range" id="precision" class="overall_config" placeholder="精細度" min="50" max="200" style="width: calc(100% - 16px);"/>
+                <br>
+                <label for="lightning-width">閃電表寬度</label><br>
+                <select id="lightning-width" class="overall_config" aria-describedby="lightning-width-help" style="width: calc(100% - 16px);">
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                    <option value="200">200</option>
+                </select><br>
+                <small id="lightning-width-help">相鄰履約價間距（點）</small>
             </span>
             <!-- <div id="prime_location" style="background-color: #333;height: 450px;padding: 5px;margin: 5px;">閒置區塊</div> -->
             <div>
@@ -373,7 +382,7 @@
             <div id="calc_para" class="text-block">
                 <h2>計算機使用之參數</h2>
                 <p>
-                    資料為 <span id="dataGetDate"></span> 取自 <a target="_blank" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a><br>
+                    保證金資料來源：<a target="_blank" rel="noopener noreferrer" href="https://www.taifex.com.tw/cht/5/indexMarging">台灣期貨交易所</a>，來源更新日期：<span id="dataGetDate"></span>（查核日期：2026-10-13）。<br>
                 </p>
                 <ul>
                     <li>契約乘數：<strong><span id="contractMultiplier"></span></strong></li>

@@ -1,0 +1,39 @@
+# Local credentials; keep sanitized examples available for documentation.
+.env
+.env.*
+!.env.example
+!.env.*.example
+/.secrets/
+
+# Private trading data (the application's default export filename).
+positions.csv
+positions ([0-9]*).csv
+/private-data/
+
+# Optional local tooling; this project currently has no build pipeline.
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+/.cache/
+/tmp/
+/temp/
+/artifacts/
+/test-results/
+/playwright-report/
+/coverage/
+*.log
+
+# Local editor / agent state. Shared architecture and instruction files stay tracked.
+/.vscode/
+/.idea/
+/.codex/
+*.swp
+*.swo
+*~
+
+# Operating system metadata.
+.DS_Store
+Thumbs.db
+Desktop.ini
